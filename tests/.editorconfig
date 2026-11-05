@@ -2,3 +2,5 @@
 [*.cs]
 # Test names read as sentences: Perft_matches_reference_vectors.
 dotnet_diagnostic.CA1707.severity = none
+# Expected values read best inline in the assertion; the allocation CA1861 avoids is irrelevant in tests.
+dotnet_diagnostic.CA1861.severity = none

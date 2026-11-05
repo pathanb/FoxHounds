@@ -1,0 +1,67 @@
+NextInt(10) x10 from seed 0: [6, 7, 1, 4, 7, 9, 4, 5, 8, 9]
+NextInt(7) x5 from seed 42: [0, 2, 4, 6, 6]
+NextInt(2147483647) x3 from seed 42: [180094358, 813853890, 1460382104]
+NextDouble x3 from seed 0: ['0.6012629994179048', '0.7477740925472398', '0.10301998939503632']
+ForGame(20261105, 17) NextU64 x2: ['0xf6a691e5ee4f5153', '0xe5e8859d59452f86']
+seed 7: Split() then NextU64 of each child: 0x214c58958ca2a8a5 0x82f0e307ada2dc5e
+
+8/a1/b2,b8,d8,f8/F       fox trapped in a corner by one hound
+    ReachHomeRow adj off     HoundsWin FoxTrapped         escaped=False
+    ReachHomeRow adj on      HoundsWin FoxTrapped         escaped=False
+    HoundsImmobile adj off   HoundsWin FoxTrapped         escaped=False
+    HoundsImmobile adj on    HoundsWin FoxTrapped         escaped=False
+8/d4/c5,e5,c3,e3/F       fox trapped in the middle by four hounds
+    ReachHomeRow adj off     HoundsWin FoxTrapped         escaped=False
+    ReachHomeRow adj on      HoundsWin FoxTrapped         escaped=False
+    HoundsImmobile adj off   HoundsWin FoxTrapped         escaped=False
+    HoundsImmobile adj on    HoundsWin FoxTrapped         escaped=False
+8/d8/b8,f8,h8,e7/H       fox on row 0, hounds to move
+    ReachHomeRow adj off     FoxWins FoxReachedHome       escaped=True
+    ReachHomeRow adj on      FoxWins FoxReachedHome       escaped=True
+    HoundsImmobile adj off   Ongoing                      escaped=False
+    HoundsImmobile adj on    Ongoing                      escaped=False
+8/d8/b8,f8,h8,e7/F       fox on row 0, fox to move
+    ReachHomeRow adj off     FoxWins FoxReachedHome       escaped=True
+    ReachHomeRow adj on      FoxWins FoxReachedHome       escaped=True
+    HoundsImmobile adj off   Ongoing                      escaped=False
+    HoundsImmobile adj on    Ongoing                      escaped=False
+8/b4/a1,c1,e1,g1/H       hounds immobile on the back row
+    ReachHomeRow adj off     FoxWins HoundsImmobile       escaped=True
+    ReachHomeRow adj on      FoxWins HoundsImmobile       escaped=True
+    HoundsImmobile adj off   FoxWins HoundsImmobile       escaped=True
+    HoundsImmobile adj on    FoxWins HoundsImmobile       escaped=True
+8/b8/a1,c1,e1,g1/H       fox home and hounds immobile (rule order)
+    ReachHomeRow adj off     FoxWins FoxReachedHome       escaped=True
+    ReachHomeRow adj on      FoxWins FoxReachedHome       escaped=True
+    HoundsImmobile adj off   FoxWins HoundsImmobile       escaped=True
+    HoundsImmobile adj on    FoxWins HoundsImmobile       escaped=True
+8/c5/e5,b4,d4,h4/F       escape exactly at fox.row = minHoundRow, fox to move
+    ReachHomeRow adj off     Ongoing                      escaped=True
+    ReachHomeRow adj on      FoxWins FoxEscaped           escaped=True
+    HoundsImmobile adj off   Ongoing                      escaped=False
+    HoundsImmobile adj on    Ongoing                      escaped=False
+8/c5/e5,b4,d4,h4/H       escape exactly at fox.row = minHoundRow, hounds to move
+    ReachHomeRow adj off     Ongoing                      escaped=True
+    ReachHomeRow adj on      FoxWins FoxEscaped           escaped=True
+    HoundsImmobile adj off   Ongoing                      escaped=False
+    HoundsImmobile adj on    Ongoing                      escaped=False
+8/c5/d6,b4,d4,h4/F       fox one row behind the rearmost hound
+    ReachHomeRow adj off     Ongoing                      escaped=False
+    ReachHomeRow adj on      Ongoing                      escaped=False
+    HoundsImmobile adj off   Ongoing                      escaped=False
+    HoundsImmobile adj on    Ongoing                      escaped=False
+8/c7/b6,d6,f6,h6/F       fox ahead of hounds with minHoundRow = 2
+    ReachHomeRow adj off     Ongoing                      escaped=True
+    ReachHomeRow adj on      FoxWins FoxEscaped           escaped=True
+    HoundsImmobile adj off   Ongoing                      escaped=True
+    HoundsImmobile adj on    FoxWins FoxEscaped           escaped=True
+8/d8/a7,c7,e7,g7/H       fox on row 0 with minHoundRow = 1, hounds to move
+    ReachHomeRow adj off     FoxWins FoxReachedHome       escaped=True
+    ReachHomeRow adj on      FoxWins FoxReachedHome       escaped=True
+    HoundsImmobile adj off   Ongoing                      escaped=False
+    HoundsImmobile adj on    Ongoing                      escaped=False
+8/d8/a7,c7,e7,g7/F       fox on row 0 boxed in with minHoundRow = 1, fox to move
+    ReachHomeRow adj off     FoxWins FoxReachedHome       escaped=True
+    ReachHomeRow adj on      FoxWins FoxReachedHome       escaped=True
+    HoundsImmobile adj off   HoundsWin FoxTrapped         escaped=False
+    HoundsImmobile adj on    HoundsWin FoxTrapped         escaped=False

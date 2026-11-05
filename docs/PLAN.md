@@ -7,8 +7,8 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 
 | Milestone | Scope | Status |
 |-----------|-------|--------|
-| M0 Setup | solution skeleton, build rules, package pins, banned APIs, CI workflow, T-ARCH-01 | done (`m0`) |
-| M1 Rules core | Geometry, RuleSet, Rules, GameState, Move, Zobrist, Rng, notation, GameRunner, RandomAgent, `fh perft`; T-CORE-01…08 | not started |
+| M0 Setup | solution skeleton, build rules, package pins, banned APIs, CI workflow, T-ARCH-01 | done (e6eaf99) |
+| M1 Rules core | Geometry, RuleSet, Rules, GameState, Move, Zobrist, Rng, notation, GameRunner, RandomAgent, `fh perft`; T-CORE-01…08 | in review |
 | M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | not started |
 | M3 Search and evaluation | features, evaluators, weight files, search stages A and B, MinimaxAgent; T-ENG-01…04, T-EVAL-01…03 | not started |
 | M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | not started |
@@ -18,7 +18,7 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M8 Hardening | n = 10 solver, self-contained builds, user guide | not started |
 
 A milestone is done when its tests from spec 15.1 pass, its numbers match the reference prototype, the
-format check is clean, and it is tagged `mN`.
+format check is clean, and its commit is recorded in the table above.
 
 ## Working agreements
 
@@ -59,3 +59,7 @@ The desktop app can be run headless for screenshots with `xvfb-run -a -s "-scree
 
 - 2026-11-05: spec reviewed against the prototype; all reference numbers reproduced. Seven issues raised
   and decided (D-13 … D-19), plus smaller decisions D-20 … D-31.
+- 2026-11-05: M0 done. Tag pushes are rejected by this environment (HTTP 403), so milestone commits are
+  recorded here instead of as tags.
+- 2026-11-05: M1 implemented: all T-CORE tests pass (perft, reachable rules, Zobrist, notation, RNG vectors,
+  game length); Core line coverage 93%. perft(10) = 16 ms. Independent review pending (D-14).

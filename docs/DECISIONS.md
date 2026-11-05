@@ -52,8 +52,9 @@ T-ARCH-01 enforces exactly this table:
 
 Nothing else references App or Cli.
 
-**D-14 Process (amends 4.3 CI and 16.2).** One developer (Claude) commits directly to `main` and tags each
-finished milestone (`m0` … `m8`). The GitHub Actions workflow exists but runs only when started by hand.
+**D-14 Process (amends 4.3 CI and 16.2).** One developer (Claude) commits directly to `main` and records the
+commit of each finished milestone in PLAN.md (this environment's GitHub access rejects tag pushes with HTTP 403,
+so there are no milestone tags on GitHub). The GitHub Actions workflow exists but runs only when started by hand.
 Performance floors are measured on the development workspace (2 vCPU, 7 GB RAM, Linux x64); this answers
 Q-04. Instead of review by a second person, M1, M2 and M3 get an independent review by a fresh agent that
 has not seen the author's reasoning; other milestones are self-reviewed.
@@ -115,7 +116,9 @@ operations are fixed:
 by every thread, so its tables are exposed as `ReadOnlySpan<T>` instead of public arrays.
 
 **D-26 Analyzer exceptions.** Listed in `.editorconfig` files, each with its reason. Currently: CA1707 (no
-underscores in names) is off in test projects, whose test names read as sentences.
+underscores in names) and CA1861 (constant array arguments) are off in test projects, whose test names read as sentences and whose expected values sit inline; CA1051 (visible
+instance fields) is suppressed on `GameState`, whose public readonly fields spec 5.2 prescribes; CA1031 (catch
+general exceptions) is suppressed in `GameRunner`, where any agent exception is a forfeit by spec 7.3.
 
 **D-27 Test platform (amends 4.1).** xunit.v3 4.0.2 (4.x is the current stable line since August 2026) on
 Microsoft.Testing.Platform, enabled in `global.json`; coverage through `coverlet.MTP`. The platform's v2 no
@@ -155,8 +158,8 @@ by the load check in 14.2). `GenerateMoves` keeps its contract from 6.1 and does
 
 | Milestone | Value | Result |
 |-----------|-------|--------|
-| M1 | perft(10) time, Classic 8×8 | _pending_ |
-| M1 | plies generated per second | _pending_ |
+| M1 | perft(10) time, Classic 8×8 | 16.0 ms (floor: 1 s). BenchmarkDotNet ShortRun, Release, .NET 10.0.14, 2-vCPU Xeon 2.1 GHz; report in docs/benchmarks/M1-perft.md |
+| M1 | plies generated per second | about 205 million (perft(10) generates 3,289,142 plies, counting the leaves, in 16.0 ms) |
 | M2 | solver build time, n = 8 | _pending_ |
 | M2 | solver build time and result, n = 10 (published: hounds win in 72) | _pending_ |
 | M3 | search nodes per second at fixed depth | _pending_ |
