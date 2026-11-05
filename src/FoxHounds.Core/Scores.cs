@@ -35,7 +35,14 @@ public static class Scores
     public static int ClampEval(long value) => (int)Math.Clamp(value, -EvalMax, EvalMax);
 
     /// <summary>Human-readable form of a scoreFox: "Fox wins in 13", "Hounds win in 44", or a signed number.</summary>
-    public static string DescribeFox(int scoreFox)
+    public static string DescribeFox(int scoreFox) => DescribeFox(scoreFox, exact: true);
+
+    /// <summary>
+    /// As <see cref="DescribeFox(int)"/>; when <paramref name="exact"/> is false a proven distance is shown as an
+    /// upper bound ("Fox wins in &lt;= 13"), because a proof carried over from an earlier search need not be the
+    /// shortest (decision D-39).
+    /// </summary>
+    public static string DescribeFox(int scoreFox, bool exact)
     {
         if (!IsProven(scoreFox))
         {
@@ -43,6 +50,7 @@ public static class Scores
         }
 
         int plies = PliesToEnd(scoreFox);
-        return scoreFox > 0 ? $"Fox wins in {plies}" : $"Hounds win in {plies}";
+        string within = exact ? "" : "<= ";
+        return scoreFox > 0 ? $"Fox wins in {within}{plies}" : $"Hounds win in {within}{plies}";
     }
 }

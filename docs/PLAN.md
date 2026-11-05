@@ -10,7 +10,7 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M0 Setup | solution skeleton, build rules, package pins, banned APIs, CI workflow, T-ARCH-01 | done (e6eaf99) |
 | M1 Rules core | Geometry, RuleSet, Rules, GameState, Move, Zobrist, Rng, notation, GameRunner, RandomAgent, `fh perft`; T-CORE-01…08 | done (dbae502, after review fixes) |
 | M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | done (dbae502, after review fixes) |
-| M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | in review |
+| M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | done (see log: commit after review fixes) |
 | M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | not started |
 | M5 Simulation harness | stage C search, openings and suites, experiment modes, statistics, `fh match/grade/report`; T-ENG-05…06, T-SIM-01…03 | not started |
 | M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02 | not started |
@@ -73,3 +73,7 @@ The desktop app can be run headless for screenshots with `xvfb-run -a -s "-scree
   equals the solver on every reachable 4×4 position and 5,000 late 8×8 positions; TT on/off agree on proven
   scores; features equal the prototype on 900 random positions of six board sizes. From the 8×8 start a 15.7M-node
   search proves "hounds win in 44" in about 2.3 s. Evaluation is ~19% of search time (SHOULD 10%; see 17.3).
+- 2026-11-05: independent review of M3 found no wrong values (features, search against the solver with warm
+  tables, budgets, allocation all checked) but two major findings: RandomAmongBest reported the best move's line
+  and score for a different played move, and T-ENG-03/04 could not catch a broken TT score conversion or a missing
+  D-39 check (shown by mutation). Fixed with D-40 … D-43; each new test was checked to fail on its mutant.

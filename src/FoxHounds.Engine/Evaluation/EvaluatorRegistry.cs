@@ -4,7 +4,8 @@ namespace FoxHounds.Engine.Evaluation;
 
 /// <summary>
 /// Evaluator types by unique name (spec 9.2). An evaluator spec names a type and, for weighted types, a weight file.
-/// New evaluator classes register here; the solver-backed evaluator is registered by FoxHounds.Agents.
+/// New evaluator classes register here. The solver-backed evaluator ("solver", in FoxHounds.Agents) is not
+/// registered: it needs a solver table, so AgentFactory creates it directly.
 /// </summary>
 public static class EvaluatorRegistry
 {

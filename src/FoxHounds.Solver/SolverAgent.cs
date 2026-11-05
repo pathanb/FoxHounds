@@ -73,7 +73,7 @@ public sealed class SolverAgent : IAgent
         var value = rated[best].ValueForMover;
         int scoreFox = Scores.ToFox(value.Score, state.SideToMove);
         var pv = PrincipalVariation(rules, state, rated[best].Move);
-        var info = new AgentInfo(scoreFox, value.Plies, 0, TimeSpan.Zero, pv, AgentInfo.SourceSolver);
+        var info = new AgentInfo(scoreFox, value.Plies, 0, TimeSpan.Zero, pv, AgentInfo.SourceSolver, Exact: true);
         return new AgentDecision(rated[best].Move, info);
     }
 

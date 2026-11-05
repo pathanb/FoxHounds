@@ -49,7 +49,7 @@ internal static class AnalyseCommand
             int scoreFox = Scores.ToFox(result.Score, s.SideToMove);
             double seconds = Math.Max(result.Elapsed.TotalSeconds, 1e-9);
             output.WriteLine(string.Create(CultureInfo.InvariantCulture,
-                $"best {rules.Geo.FormatMove(result.Move)}  scoreFox {Scores.DescribeFox(scoreFox)}  depth {result.Depth}{(result.Exact ? " (exact)" : "")}  nodes {result.Nodes:N0}  {result.Nodes / seconds / 1e6:F2} M nodes/s  {result.Elapsed.TotalMilliseconds:F0} ms"));
+                $"best {rules.Geo.FormatMove(result.Move)}  scoreFox {Scores.DescribeFox(scoreFox, result.Exact)}  depth {result.Depth}{(result.Exact ? " (exact)" : "")}  nodes {result.Nodes:N0}  {result.Nodes / seconds / 1e6:F2} M nodes/s  {result.Elapsed.TotalMilliseconds:F0} ms"));
             output.WriteLine("line " + string.Join(' ', search.PrincipalVariation.ToArray().Select(rules.Geo.FormatMove)));
 
             if (parse.GetValue(solver))

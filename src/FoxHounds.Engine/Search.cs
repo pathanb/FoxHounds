@@ -45,7 +45,11 @@ public sealed record SearchOptions
 /// <param name="Depth">Last completed iteration in plies; 0 when none completed.</param>
 /// <param name="Nodes">Nodes searched.</param>
 /// <param name="Elapsed">Time spent, from the search's clock.</param>
-/// <param name="Exact">True when the score is a proven result or the search was exhaustive.</param>
+/// <param name="Exact">
+/// True when the score is final: a proven result that fits within the completed depth (decision D-39), or a search
+/// that reached every game end. A proof carried over in the table from an earlier, deeper search can make the score
+/// proven but not exact: the winner is right and the distance is an upper bound.
+/// </param>
 public readonly record struct SearchResult(Move Move, int Score, int Depth, long Nodes, TimeSpan Elapsed, bool Exact)
 {
     /// <summary>True when no iteration completed and <see cref="Move"/> is the first ordered legal ply (spec 8.6).</summary>
@@ -80,6 +84,10 @@ public sealed class Search
     private readonly int[] _rootScores = new int[Rules.MaxMoves];
     private readonly Move[] _completedMoves = new Move[Rules.MaxMoves];   // root moves and scores of the last
     private readonly int[] _completedScores = new int[Rules.MaxMoves];    // completed iteration (RandomAmongBest)
+    private readonly Move[] _rootLines;     // RandomAmongBest: each root move's line, _width per move
+    private readonly int[] _rootLineLengths = new int[Rules.MaxMoves];
+    private readonly Move[] _completedLines;
+    private readonly int[] _completedLineLengths = new int[Rules.MaxMoves];
     private int _rootPvLength;
     private long _nodes;
     private int _depthInProgress;
@@ -108,6 +116,8 @@ public sealed class Search
         _pv = new Move[_width * _width];
         _pvLength = new int[_width + 1];
         _rootPv = new Move[_width];
+        _rootLines = new Move[Rules.MaxMoves * _width];
+        _completedLines = new Move[Rules.MaxMoves * _width];
         Array.Fill(_killers, Move.None);
     }
 
@@ -214,6 +224,16 @@ public sealed class Search
             _rootScores.AsSpan(0, rootCount).CopyTo(_completedScores);
             _rootPvLength = Math.Max(0, _pvLength[0]);
             _pv.AsSpan(0, _rootPvLength).CopyTo(_rootPv);
+            if (randomRoot)
+            {
+                for (int i = 0; i < rootCount; i++)
+                {
+                    int length = _rootLineLengths[i];
+                    _rootLines.AsSpan(i * _width, length).CopyTo(_completedLines.AsSpan(i * _width));
+                    _completedLineLengths[i] = length;
+                }
+            }
+
             if ((Scores.IsProven(score) && Scores.PliesToEnd(score) <= depth) || depth >= pliesLeft)
             {
                 exact = true;
@@ -234,7 +254,19 @@ public sealed class Search
         }
         else if (randomRoot)
         {
-            bestMove = PickRandomAmongBest(rootCount, bestScore, rng!, bestIndex);
+            // Report the chosen move's own value and line, not the best move's (AgentInfo: the line starts with
+            // the chosen ply). Every root move was searched with a full window, so its score is its value.
+            int chosen = PickRandomAmongBest(rootCount, bestScore, rng!, bestIndex);
+            if (chosen != bestIndex)
+            {
+                bestScore = _completedScores[chosen];
+                _rootPvLength = _completedLineLengths[chosen];
+                _completedLines.AsSpan(chosen * _width, _rootPvLength).CopyTo(_rootPv);
+                exact = completedDepth >= pliesLeft
+                    || (Scores.IsProven(bestScore) && Scores.PliesToEnd(bestScore) <= completedDepth);
+            }
+
+            bestMove = _completedMoves[chosen];
         }
 
         Volatile.Write(ref _depthInProgress, 0);
@@ -262,6 +294,16 @@ public sealed class Search
             }
 
             _rootScores[i] = v;
+            if (fullWindowForAll)
+            {
+                // The child's line is in PV row 1 (empty after a table cutoff, as for the best move's line).
+                int at = i * _width;
+                int end = Math.Max(_pvLength[1], 1);
+                _rootLines[at] = _rootMoves[i];
+                _pv.AsSpan(_width + 1, end - 1).CopyTo(_rootLines.AsSpan(at + 1));
+                _rootLineLengths[i] = end;
+            }
+
             if (v > best)
             {
                 best = v;
@@ -447,7 +489,8 @@ public sealed class Search
 
     private void OrderRoot(int count, Move ttMove, Side side) => Order(_rootMoves.AsSpan(0, count), ttMove, 0, side);
 
-    private Move PickRandomAmongBest(int count, int best, Rng rng, int bestIndex)
+    /// <summary>Index into the completed iteration's root moves of a random move within the margin of the best.</summary>
+    private int PickRandomAmongBest(int count, int best, Rng rng, int bestIndex)
     {
         bool anyNonLosing = false;
         for (int i = 0; i < count; i++)
@@ -466,8 +509,7 @@ public sealed class Search
             }
         }
 
-        int chosen = n == 0 ? bestIndex : candidates[rng.NextInt(n)];
-        return _completedMoves[chosen];
+        return n == 0 ? bestIndex : candidates[rng.NextInt(n)];
     }
 
     private static bool IsProvenLoss(int score) => Scores.IsProven(score) && score < 0;

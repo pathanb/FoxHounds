@@ -83,7 +83,8 @@ public sealed class MinimaxAgent : IAgent
             result.Nodes,
             result.Elapsed,
             search.PrincipalVariation.ToArray(),
-            AgentInfo.SourceSearch);
+            AgentInfo.SourceSearch,
+            result.Exact);
         return new AgentDecision(result.Move, info);
     }
 }

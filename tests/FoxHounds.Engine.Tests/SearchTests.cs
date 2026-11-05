@@ -257,16 +257,7 @@ public sealed class SearchTests
         Assert.Equal(2, picks.Count); // with a zero evaluator both fox moves score 0
         Assert.Throws<ArgumentNullException>(() => random.Run(start, SearchBudget.Depth(2), TestContext.Current.CancellationToken));
 
-        // Never a proven loss when a non-losing move exists, even with a huge margin.
-        var trap = NewSearch(rules, ZeroEvaluator.Instance, options: new SearchOptions { RootSelection = RootSelection.RandomAmongBest, Margin = 3 * Scores.Win });
-        var s = rules.FromNotation("8/e3/b6,d4,f4,h6/F"); // fox on e3 with hounds around: some moves lose quickly
-        for (ulong seed = 0; seed < 30; seed++)
-        {
-            var result = trap.Run(s, SearchBudget.Depth(6), TestContext.Current.CancellationToken, new Rng(seed));
-            var child = rules.Apply(s, result.Move);
-            var check = NewSearch(rules, ZeroEvaluator.Instance).Run(child, SearchBudget.Depth(5), TestContext.Current.CancellationToken);
-            Assert.False(Scores.IsProven(check.Score) && check.Score > 0, $"seed {seed} chose a proven loss {rules.Geo.FormatMove(result.Move)}");
-        }
+        // Never playing a proven loss is tested in ReviewRegressionTests (the position here had no losing move).
     }
 
     [Fact]

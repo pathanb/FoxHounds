@@ -36,13 +36,18 @@ public sealed record AgentDecision(Move Move, AgentInfo Info);
 /// <param name="Elapsed">Wall time spent; never used in determinism comparisons (D-20).</param>
 /// <param name="PrincipalVariation">Expected line starting with the chosen ply; may be empty.</param>
 /// <param name="Source">"search", "solver" or "random".</param>
+/// <param name="Exact">
+/// True when <paramref name="ScoreFox"/> is final (the solver, or a search result that is exact under D-39). A
+/// proven score that is not exact has the right winner, but its distance is only an upper bound.
+/// </param>
 public sealed record AgentInfo(
     int? ScoreFox,
     int DepthReached,
     long Nodes,
     TimeSpan Elapsed,
     IReadOnlyList<Move> PrincipalVariation,
-    string Source)
+    string Source,
+    bool Exact = false)
 {
     /// <summary>Source of a searched decision.</summary>
     public const string SourceSearch = "search";

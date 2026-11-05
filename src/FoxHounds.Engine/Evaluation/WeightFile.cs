@@ -81,6 +81,7 @@ public sealed record WeightFile
         try
         {
             dto = JsonSerializer.Deserialize(json, EngineJsonContext.Default.WeightFileJson);
+            RejectMisspeltNames(json, source);
         }
         catch (JsonException ex)
         {
@@ -109,6 +110,33 @@ public sealed record WeightFile
         };
         file.Validate(source);
         return file;
+    }
+
+    /// <summary>
+    /// Unknown top-level fields are ignored (spec 14), but one that differs from a known field only in letter case
+    /// ("boardsize") is a typo that would silently drop that field, so it is rejected.
+    /// </summary>
+    private static void RejectMisspeltNames(string json, string source)
+    {
+        string[] known = ["format", "name", "evaluator", "boardSize", "weights", "early", "late", "provenance"];
+        using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
+        {
+            CommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true,
+        });
+        if (doc.RootElement.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        foreach (var property in doc.RootElement.EnumerateObject())
+        {
+            string? match = Array.Find(known, k => string.Equals(k, property.Name, StringComparison.OrdinalIgnoreCase));
+            if (match is not null && match != property.Name)
+            {
+                throw new InvalidDataException($"{source}: field '{property.Name}' should be spelt '{match}'.");
+            }
+        }
     }
 
     /// <summary>Writes the file as indented JSON with a format tag.</summary>
@@ -289,7 +317,8 @@ internal sealed class WeightFileJson
     WriteIndented = true,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     ReadCommentHandling = JsonCommentHandling.Skip,
-    AllowTrailingCommas = true)]
+    AllowTrailingCommas = true,
+    AllowDuplicateProperties = false)]
 [JsonSerializable(typeof(WeightFileJson))]
 internal sealed partial class EngineJsonContext : JsonSerializerContext
 {

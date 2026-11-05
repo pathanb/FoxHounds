@@ -183,6 +183,33 @@ proven root score only when its distance is at most the depth just completed. A 
 transposition can be longer than the current depth and might not be the shortest; deepening on until the proof fits
 guarantees the exact shortest-win and longest-loss distances (T-ENG-03 and T-ENG-04).
 
+Fixes from the independent M3 review (2026-11-05), each with a regression test in
+`tests/FoxHounds.Engine.Tests/ReviewRegressionTests.cs`; every test was checked to fail on the mutant it targets:
+
+**D-40 RandomAmongBest reports the move it plays (completes 7.1, 8.7).** The score and line were the best move's
+even when another move within the margin was chosen. Every root move is searched with a full window in this mode,
+so the search now keeps each root move's line and reports the chosen move's own value and line.
+
+**D-41 Agent info says whether a proven score is exact (completes 7.1, refines D-39).** A proof carried over in the
+table from an earlier, deeper search has the right winner, but its distance is only an upper bound (the review
+found "fox wins in 9" where the solver says 5). `AgentInfo.Exact` is true for the solver and for search results
+that are exact under D-39; `Scores.DescribeFox(score, exact: false)` shows such a proof as "Fox wins in <= 9", and
+`fh analyse` uses it. `SearchResult.Exact` is documented accordingly.
+
+**D-42 Weight files reject duplicate keys and case-misspelt fields (completes 9.3, 14).** A duplicate feature key
+used to win silently, and `"boardsize"` silently dropped the board-size guard. Duplicate keys are now an error, and
+so is a top-level field that differs from a known one only in letter case. Other unknown fields are still ignored,
+as 14 requires; rejecting every unknown field (the reviewer's alternative) would break that forward compatibility.
+
+**D-43 Search tests keep tables across moves (strengthens T-ENG-03, T-ENG-04).** Within one search every node is
+the same number of plies from the root, so a broken 8.3 conversion cancels out and no proof outgrows the depth: the
+old tests, which clear the table before each position, could not catch either bug. A differential test now plays
+whole games in which each side keeps its table, with depth budgets and node budgets that abort mid-iteration, on
+5×5–7×7 Classic and 6×6 Gilith; every exact result must equal the solver, every exact move must keep the solver's
+value, and every other proof must have the right winner and a distance no shorter than the solver's. Further
+tests check that lines are full length with the root score at their leaf, that RandomAmongBest never plays a
+proven loss (on a position that has one), and that tapered scores are truncated toward zero.
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |
