@@ -27,12 +27,10 @@ public sealed record GameOptions
 /// <summary>Drives one game between two agents (spec 7.3). Used by the CLI and the simulator.</summary>
 public static class GameRunner
 {
-    /// <summary>A forfeit is declared when an agent overruns its hard time limit by more than this factor.</summary>
-    public const double HardTimeTolerance = 1.2;
-
     /// <summary>
     /// Plays a game. Each agent gets its own random stream split from <paramref name="rng"/>, fox first (D-23).
-    /// An agent that throws, returns an illegal ply or overruns its hard time limit forfeits. Cancelling
+    /// An agent that throws, returns an illegal ply or overruns its hard time limit by more than 20% forfeits; an
+    /// <see cref="InvariantViolationException"/> is a rules bug and propagates instead. Cancelling
     /// <paramref name="ct"/> stops the game with <see cref="OperationCanceledException"/>.
     /// </summary>
     /// <param name="rules">The rules.</param>
@@ -60,6 +58,11 @@ public static class GameRunner
         var game = new GameInProgress(rules, options, rng.Seed, clock.UtcNow, fox, hounds);
         Rng foxRng = rng.Split();
         Rng houndsRng = rng.Split();
+        if (options.Start is { } given)
+        {
+            rules.Validate(given);
+            game.Start = given;
+        }
 
         if (!TryCall(() => fox.NewGame(rules, Side.Fox, foxRng), ct, out string? error))
         {
@@ -71,12 +74,7 @@ public static class GameRunner
             return game.Forfeit(Side.Hounds, ForfeitCause.AgentThrew, error);
         }
 
-        if (options.Start is { } given)
-        {
-            rules.Validate(given);
-            game.Start = given;
-        }
-        else if (rules.Config.FoxStart == FoxStart.ChooseOnBackRow)
+        if (options.Start is null && rules.Config.FoxStart == FoxStart.ChooseOnBackRow)
         {
             byte chosen = 0;
             if (!TryCall(() => chosen = fox.ChooseFoxStart(rules), ct, out error))
@@ -116,13 +114,13 @@ public static class GameRunner
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not InvariantViolationException)
             {
                 return game.Forfeit(side, ForfeitCause.AgentThrew, $"{ex.GetType().Name}: {ex.Message}");
             }
 
             TimeSpan spent = clock.Elapsed - before;
-            if (budget.HardTime is { } hard && spent > hard * HardTimeTolerance)
+            if (budget.HardTime is { } hard && spent - hard > hard / 5) // more than 20% over, without overflow
             {
                 return game.Forfeit(side, ForfeitCause.TimeLimit, $"took {spent.TotalMilliseconds:F0} ms with a hard limit of {hard.TotalMilliseconds:F0} ms");
             }
@@ -155,8 +153,8 @@ public static class GameRunner
         {
             throw;
         }
-#pragma warning disable CA1031 // Spec 7.3: an agent exception is a forfeit.
-        catch (Exception ex)
+#pragma warning disable CA1031 // Spec 7.3: an agent exception is a forfeit, except a detected rules bug.
+        catch (Exception ex) when (ex is not InvariantViolationException)
 #pragma warning restore CA1031
         {
             error = $"{ex.GetType().Name}: {ex.Message}";

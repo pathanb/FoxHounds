@@ -2,6 +2,8 @@
 
 1. RNG derivations fixed by decision D-24 (NextInt via Lemire's method, NextDouble, Split, ForGame).
 2. End-of-game outcomes for the hand-built positions of T-CORE-04, under every ruleset variant.
+3. More Zobrist keys (pins the HoundKey, FoxKey, SideKey draw order of spec 5.4) and the plies a uniformly random
+   agent plays from Rng(5) (pins RandomAgent's use of NextInt).
 
 Run: python3 reference/core_vectors.py > reference/core_vectors.txt
 """
@@ -60,6 +62,21 @@ def rng_vectors():
     r = Rng(7)
     a, b = r.split(), r.split()
     print("seed 7: Split() then NextU64 of each child:", hex(a.next_u64()), hex(b.next_u64()))
+    z = fp.splitmix64(0x9E3779B97F4A7C15 ^ 8)
+    hound = [next(z) for _ in range(32)]
+    fox = [next(z) for _ in range(32)]
+    side = next(z)
+    print("Zobrist n=8 FoxKey[0], FoxKey[31], SideKey:", hex(fox[0]), hex(fox[31]), hex(side))
+    g = fp.Game(8)
+    st = g.initial()
+    r = Rng(5)
+    plies = []
+    for _ in range(14):
+        ms = g.moves(st)
+        m = ms[r.next_int(len(ms))]
+        plies.append(f"{g.name(m[0])}-{g.name(m[1])}")
+        st = g.apply(st, m)
+    print("uniform random plies from the 8x8 start with Rng(5):", " ".join(plies))
 
 
 CASES = [

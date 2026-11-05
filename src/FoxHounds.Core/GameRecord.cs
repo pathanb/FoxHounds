@@ -85,10 +85,17 @@ public sealed record GameRecord
 
     /// <summary>Replays the plies from <see cref="Start"/> with full legality checks and returns every position,
     /// starting with <see cref="Start"/>.</summary>
+    /// <param name="rules">Rules for exactly this record's <see cref="RuleSet"/>.</param>
+    /// <exception cref="ArgumentException"><paramref name="rules"/> implement a different ruleset.</exception>
     /// <exception cref="IllegalMoveException">A stored ply is not legal.</exception>
     public IReadOnlyList<GameState> Replay(Rules rules)
     {
         ArgumentNullException.ThrowIfNull(rules);
+        if (rules.Config != RuleSet)
+        {
+            throw new ArgumentException($"The record was played under {RuleSet}, not {rules.Config}.", nameof(rules));
+        }
+
         rules.Validate(Start);
         var positions = new List<GameState>(Plies.Count + 1) { Start };
         GameState s = Start;

@@ -141,6 +141,28 @@ debug builds, `CreateChecked` validates and throws. "Only Rules creates states" 
 position whose `Evaluate` is not Ongoing, so `ApplyChecked` rejects plies after the end of a game (needed
 by the load check in 14.2). `GenerateMoves` keeps its contract from 6.1 and does not check.
 
+Decisions from the independent reviews of M1 and M2 (2026-11-05):
+
+**D-32 Table files carry a win-condition check (complements 10.6).** The SHA-256 covers only the payload, so a
+flipped win-condition byte in the header used to load a Classic table as Gilith. `Load` now checks the payload's
+own signature: with all hounds on the back row and the fox on row 0 with the fox to move, ReachHomeRow stores 0
+(spec 10.3) and HoundsImmobile stores a value. Format version 1 is unchanged.
+
+**D-33 Table store semantics (completes 10.6).** Concurrent requests for one table share one build; each caller
+waits with its own cancellation token and gets its own progress reports, and the build is cancelled only when every
+waiting caller has given up. A table that cannot be saved is still returned, with a warning. Saves go to a uniquely
+named temporary file that is flushed to disk before the rename. When the platform reports no user data folder, the
+default store uses the temp folder, so its path is always absolute.
+
+**D-34 Runner and budget robustness (completes 7.1, 7.3).** An `InvariantViolationException` raised inside an agent
+is a rules bug and propagates; it is never a forfeit. A given start position is validated and recorded before the
+agents' `NewGame`. The 20% hard-time tolerance is checked without overflow. `SearchBudget` rejects negative limits
+and a zero node limit (use null for "no limit"). `GameRecord.Replay` requires rules for the record's own ruleset.
+`Rules.ToNotation` refuses a position of another board size; the other per-position methods assert it in debug.
+
+**D-35 GameState.GetHashCode folds the Zobrist hash.** Equal states have equal hashes (5.2), and unlike
+`HashCode.Combine` the value is the same in every process, so hash sets of positions iterate reproducibly.
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |

@@ -57,16 +57,63 @@ public sealed record AgentInfo(
     public static AgentInfo Random { get; } = new(null, 0, 0, TimeSpan.Zero, [], SourceRandom);
 }
 
-/// <summary>Limits for one decision (spec 7.1). Experiments use depth or node limits only (D-09).</summary>
-/// <param name="MaxDepth">Deepest iteration in plies.</param>
-/// <param name="MaxNodes">Node limit.</param>
-/// <param name="SoftTime">Do not start a new iteration after this.</param>
-/// <param name="HardTime">Abort the search at this point; the game runner forfeits an agent that overruns it by more
-/// than 20%.</param>
-public sealed record SearchBudget(int? MaxDepth, long? MaxNodes, TimeSpan? SoftTime, TimeSpan? HardTime)
+/// <summary>
+/// Limits for one decision (spec 7.1). Experiments use depth or node limits only (D-09). A null limit means "no
+/// limit"; negative limits and a zero node limit are rejected, so a sentinel such as
+/// <see cref="Timeout.InfiniteTimeSpan"/> cannot silently mean "no time at all".
+/// </summary>
+public sealed record SearchBudget
 {
+    private readonly int? _maxDepth;
+    private readonly long? _maxNodes;
+    private readonly TimeSpan? _softTime;
+    private readonly TimeSpan? _hardTime;
+
+    /// <summary>Creates a budget.</summary>
+    /// <param name="maxDepth">Deepest iteration in plies.</param>
+    /// <param name="maxNodes">Node limit.</param>
+    /// <param name="softTime">Do not start a new iteration after this.</param>
+    /// <param name="hardTime">Abort the search at this point; the game runner forfeits an agent that overruns it by
+    /// more than 20%.</param>
+    /// <exception cref="ArgumentOutOfRangeException">A limit is negative, or the node limit is zero.</exception>
+    public SearchBudget(int? maxDepth, long? maxNodes, TimeSpan? softTime, TimeSpan? hardTime)
+    {
+        MaxDepth = maxDepth;
+        MaxNodes = maxNodes;
+        SoftTime = softTime;
+        HardTime = hardTime;
+    }
+
     /// <summary>No limits at all: the agent decides. Searching agents treat it as exhaustive.</summary>
     public static SearchBudget Unlimited { get; } = new(null, null, null, null);
+
+    /// <summary>Deepest iteration in plies.</summary>
+    public int? MaxDepth
+    {
+        get => _maxDepth;
+        init => _maxDepth = value is < 0 ? throw new ArgumentOutOfRangeException(nameof(MaxDepth), value, "Depth limit must not be negative.") : value;
+    }
+
+    /// <summary>Node limit; must be positive when set.</summary>
+    public long? MaxNodes
+    {
+        get => _maxNodes;
+        init => _maxNodes = value is <= 0 ? throw new ArgumentOutOfRangeException(nameof(MaxNodes), value, "Node limit must be positive.") : value;
+    }
+
+    /// <summary>Do not start a new iteration after this.</summary>
+    public TimeSpan? SoftTime
+    {
+        get => _softTime;
+        init => _softTime = value is { } t && t < TimeSpan.Zero ? throw new ArgumentOutOfRangeException(nameof(SoftTime), value, "Time limit must not be negative.") : value;
+    }
+
+    /// <summary>Abort the search at this point; the game runner forfeits an agent that overruns it by more than 20%.</summary>
+    public TimeSpan? HardTime
+    {
+        get => _hardTime;
+        init => _hardTime = value is { } t && t < TimeSpan.Zero ? throw new ArgumentOutOfRangeException(nameof(HardTime), value, "Time limit must not be negative.") : value;
+    }
 
     /// <summary>True when the budget contains no time limit, so results do not depend on machine load.</summary>
     public bool IsDeterministic => SoftTime is null && HardTime is null;

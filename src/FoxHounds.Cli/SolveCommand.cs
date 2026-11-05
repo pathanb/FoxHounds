@@ -52,8 +52,13 @@ internal static class SolveCommand
                 var rules = new Rules(new RuleSet { BoardSize = n, FoxWinCondition = condition, AdjudicateEscape = false });
                 var clock = SystemClock.Instance;
                 TimeSpan t0 = clock.Elapsed;
+                var store = new SolverTableStore(SolverTableStore.DefaultDirectory)
+                {
+                    MaxDegreeOfParallelism = parse.GetValue(threads),
+                    Warn = message => Console.Error.WriteLine($"warning: {message}"),
+                };
                 var table = parse.GetValue(cache)
-                    ? SolverTableStore.Default.GetOrBuild(rules, null, CancellationToken.None)
+                    ? store.GetOrBuild(rules, null, CancellationToken.None)
                     : SolverTable.Build(rules, parse.GetValue(threads), null, CancellationToken.None);
                 TimeSpan spent = clock.Elapsed - t0;
                 string label = condition == FoxWinCondition.ReachHomeRow ? "Classic" : "Gilith";

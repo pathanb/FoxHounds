@@ -99,7 +99,8 @@ public sealed class RngAndZobristTests
         var rng = new Rng(3);
         for (int i = 0; i < 10_000; i++)
         {
-            Assert.InRange(rng.NextDouble(), 0.0, 1.0 - double.Epsilon);
+            double x = rng.NextDouble();
+            Assert.True(x is >= 0.0 and < 1.0, $"{x}"); // 1.0 - double.Epsilon == 1.0, so InRange admitted 1
         }
     }
 

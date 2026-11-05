@@ -50,11 +50,9 @@ public sealed class SolverAgent : IAgent
         for (int i = 0; i < starts.Count; i++)
         {
             var start = rules.Initial(starts[i]);
-            var v = _table.Get(start);
-            bool foxWins = v.Winner(start.SideToMove) == Side.Fox;
 
             // Rate the choice like a ply of the fox's: the value from the fox's perspective.
-            rated[i] = new RatedMove(new Move(starts[i], starts[i]), new SolvedValue(foxWins, v.Plies));
+            rated[i] = new RatedMove(new Move(starts[i], starts[i]), FoxPerspective(_table.Get(start), start.SideToMove));
         }
 
         return starts[Pick(rated)];
@@ -116,8 +114,13 @@ public sealed class SolverAgent : IAgent
         return best;
     }
 
-    /// <summary>Positive when <paramref name="a"/> is better for the mover than <paramref name="b"/>.</summary>
-    private static int Compare(SolvedValue a, SolvedValue b)
+    /// <summary>A start position's value seen by the fox, whoever moves first.</summary>
+    internal static SolvedValue FoxPerspective(SolvedValue value, Side sideToMove) =>
+        new(value.Winner(sideToMove) == Side.Fox, value.Plies);
+
+    /// <summary>Positive when <paramref name="a"/> is better for the mover than <paramref name="b"/>: any win beats
+    /// any loss, a shorter win beats a longer one, a longer loss beats a shorter one.</summary>
+    internal static int Compare(SolvedValue a, SolvedValue b)
     {
         if (a.SideToMoveWins != b.SideToMoveWins)
         {

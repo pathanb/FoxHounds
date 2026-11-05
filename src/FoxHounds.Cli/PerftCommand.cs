@@ -9,7 +9,7 @@ internal static class PerftCommand
 {
     public static Command Create()
     {
-        var size = new Option<int>("--n") { Description = "Board size n, 4…16.", DefaultValueFactory = _ => 8 };
+        var size = new Option<int?>("--n") { Description = "Board size n, 4…16 (default 8, or the size of --position)." };
         var depth = new Option<int>("--depth", "-d") { Description = "Deepest perft depth in plies.", DefaultValueFactory = _ => 10 };
         var position = new Option<string?>("--position", "-p") { Description = "Start position in notation (spec 5.6); default: the initial position." };
         var fox = new Option<string?>("--fox") { Description = "Fox start square for the initial position, e.g. e1." };
@@ -26,15 +26,21 @@ internal static class PerftCommand
         command.SetAction(parse =>
         {
             var output = parse.InvocationConfiguration.Output;
+            string? notation = parse.GetValue(position);
+            if (notation is not null && parse.GetValue(fox) is not null)
+            {
+                throw new ArgumentException("--fox applies to the initial position only; it cannot be combined with --position.");
+            }
+
             var ruleSet = new RuleSet
             {
-                BoardSize = parse.GetValue(size),
+                BoardSize = parse.GetValue(size) ?? BoardSizeOf(notation) ?? 8,
                 FirstMover = parse.GetValue(first),
                 FoxWinCondition = parse.GetValue(win),
                 AdjudicateEscape = parse.GetValue(adjudicate),
             };
             var rules = new Rules(ruleSet);
-            GameState start = StartPosition(rules, parse.GetValue(position), parse.GetValue(fox));
+            GameState start = StartPosition(rules, notation, parse.GetValue(fox));
             int maxDepth = parse.GetValue(depth);
 
             output.WriteLine($"perft {rules.ToNotation(start)}  ({Describe(ruleSet)})");
@@ -79,6 +85,17 @@ internal static class PerftCommand
         }
 
         return rules.Initial((byte)sq);
+    }
+
+    private static int? BoardSizeOf(string? notation)
+    {
+        if (notation is null)
+        {
+            return null;
+        }
+
+        int slash = notation.IndexOf('/', StringComparison.Ordinal);
+        return slash > 0 && int.TryParse(notation.AsSpan(0, slash), NumberStyles.None, CultureInfo.InvariantCulture, out int n) ? n : null;
     }
 
     private static string Describe(RuleSet r) =>

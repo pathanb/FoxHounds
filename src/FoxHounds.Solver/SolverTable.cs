@@ -132,8 +132,10 @@ public sealed class SolverTable
     /// </summary>
     /// <param name="s">The position.</param>
     /// <param name="buffer">At least <see cref="Core.Rules.MaxMoves"/> long.</param>
+    /// <exception cref="ArgumentException">The position is malformed or belongs to another board size.</exception>
     public int RateMoves(in GameState s, Span<RatedMove> buffer)
     {
+        _ = IndexOf(s); // validates the position against this table before the rules touch it
         if (Rules.Evaluate(s).IsOver)
         {
             return 0;
@@ -186,8 +188,12 @@ public sealed class SolverTable
         return true;
     }
 
-    /// <summary>Writes the table file (spec 10.6): header with a SHA-256 of the payload, then the raw bytes. The file
-    /// is written to a temporary name first and renamed, so a crash never leaves a truncated table behind.</summary>
+    /// <summary>
+    /// Writes the table file (spec 10.6): header with a SHA-256 of the payload, then the raw bytes. The bytes go to a
+    /// uniquely named temporary file, are flushed to disk, and only then is the file renamed into place; on failure the
+    /// temporary file is deleted. A reader therefore sees either the old file or the complete new one, and a damaged
+    /// file is caught by its hash in any case.
+    /// </summary>
     public void Save(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -197,8 +203,24 @@ public sealed class SolverTable
             Directory.CreateDirectory(dir);
         }
 
-        string temp = path + ".tmp";
-        using (var stream = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None))
+        string temp = $"{path}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            WriteFile(temp);
+            File.Move(temp, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temp))
+            {
+                File.Delete(temp);
+            }
+        }
+    }
+
+    private void WriteFile(string temp)
+    {
+        using (var stream = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         {
             Span<byte> header = stackalloc byte[HeaderSize];
             Magic.CopyTo(header);
@@ -211,9 +233,8 @@ public sealed class SolverTable
             SHA256.HashData(_values, header[22..]);
             stream.Write(header);
             stream.Write(_values);
+            stream.Flush(flushToDisk: true);
         }
-
-        File.Move(temp, path, overwrite: true);
     }
 
     /// <summary>Reads a table file, verifying magic, version, sizes and the payload hash.</summary>
@@ -268,7 +289,34 @@ public sealed class SolverTable
         }
 
         var rules = new Rules(new RuleSet { BoardSize = n, FoxWinCondition = win, AdjudicateEscape = false });
-        return new SolverTable(rules, values);
+        var table = new SolverTable(rules, values);
+        if (!table.PayloadMatchesWinCondition())
+        {
+            // The hash covers only the payload (spec 10.6), so check the header's win-condition byte against the data.
+            throw new InvalidDataException($"{path}: the header says {win}, but the payload belongs to the other win condition.");
+        }
+
+        return table;
+    }
+
+    /// <summary>
+    /// The payload's own signature of its win condition (decision D-32): with all hounds on the back row and the fox
+    /// on row 0 with the fox to move, ReachHomeRow stores 0 (spec 10.3) while HoundsImmobile stores a value.
+    /// </summary>
+    private bool PayloadMatchesWinCondition()
+    {
+        bool reachHome = WinCondition == FoxWinCondition.ReachHomeRow;
+        long backRowRank = _index.Count - 1; // the highest squares are exactly the back row
+        for (int fox = 0; fox < _houndCount; fox++) // the lowest squares are exactly row 0
+        {
+            byte b = _values[((backRowRank * _squareCount) + fox) * 2];
+            if ((b == 0) != reachHome)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>Reads a table file and refuses one built for another board size or win condition.</summary>

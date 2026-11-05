@@ -38,6 +38,26 @@ public sealed class RandomAgentTests
     }
 
     [Fact]
+    public void Draws_its_plies_with_NextInt_exactly_as_the_reference()
+    {
+        // reference/core_vectors.txt: uniform plies from the 8×8 start with Rng(5), computed with the prototype.
+        const string expected = "e1-d2 f8-e7 d2-c1 e7-d6 c1-d2 d6-c5 d2-c1 c5-b4 c1-b2 d8-c7 b2-c1 h8-g7 c1-b2 b4-a3";
+        var rules = new Rules(RuleSet.Classic);
+        var agent = new RandomAgent();
+        agent.NewGame(rules, Side.Fox, new Rng(5));
+        var s = rules.Initial();
+        var plies = new List<string>();
+        for (int i = 0; i < 14; i++)
+        {
+            var m = agent.ChooseMove(s, [], SearchBudget.Unlimited, TestContext.Current.CancellationToken).Move;
+            plies.Add(rules.Geo.FormatMove(m));
+            s = rules.Apply(s, m);
+        }
+
+        Assert.Equal(expected, string.Join(' ', plies));
+    }
+
+    [Fact]
     public void Reports_source_random_and_requires_NewGame()
     {
         var rules = new Rules(RuleSet.Classic);

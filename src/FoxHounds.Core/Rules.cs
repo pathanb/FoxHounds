@@ -107,6 +107,7 @@ public sealed class Rules
     /// <summary>Sum of the hounds' rows: the potential that orders the solver's sweep (spec 10.4).</summary>
     public int HoundRowSum(in GameState s)
     {
+        Debug.Assert(s.N == _n, "Position belongs to another board size.");
         int sum = 0;
         UInt128 h = s.Hounds;
         while (h != UInt128.Zero)
@@ -169,6 +170,7 @@ public sealed class Rules
     /// <param name="buffer">At least <see cref="MaxMoves"/> long.</param>
     public int GenerateMoves(in GameState s, Span<Move> buffer)
     {
+        Debug.Assert(s.N == _n, "Position belongs to another board size.");
         UInt128 occupied = s.Hounds | (UInt128.One << s.Fox);
         int count = 0;
         if (s.SideToMove == Side.Fox)
@@ -212,6 +214,7 @@ public sealed class Rules
     /// <summary>True when the side to move has at least one legal ply. Does not check whether the game is over.</summary>
     public bool HasAnyMove(in GameState s)
     {
+        Debug.Assert(s.N == _n, "Position belongs to another board size.");
         UInt128 empty = ~(s.Hounds | (UInt128.One << s.Fox));
         if (s.SideToMove == Side.Fox)
         {
@@ -287,13 +290,18 @@ public sealed class Rules
     /// </summary>
     public bool IsEscaped(in GameState s)
     {
+        Debug.Assert(s.N == _n, "Position belongs to another board size.");
         int foxRow = _row[s.Fox];
         int minHoundRow = MinHoundRow(s);
         return _reachHome ? foxRow <= minHoundRow : foxRow < minHoundRow && minHoundRow >= 2;
     }
 
     /// <summary>The smallest row occupied by a hound, in O(1): indices increase in row-major order (spec 6.2).</summary>
-    public int MinHoundRow(in GameState s) => _row[(int)UInt128.TrailingZeroCount(s.Hounds)];
+    public int MinHoundRow(in GameState s)
+    {
+        Debug.Assert(s.N == _n, "Position belongs to another board size.");
+        return _row[(int)UInt128.TrailingZeroCount(s.Hounds)];
+    }
 
     /// <summary>Checks the invariants of spec 5.2: board size, exactly H hounds on playable squares, the fox on a
     /// playable square not shared with a hound, a defined side to move, and a hash equal to a full recomputation.</summary>
@@ -344,7 +352,16 @@ public sealed class Rules
     public GameState FromNotation(string text) => Notation.Parse(this, text);
 
     /// <summary>The canonical notation of a position: hounds in ascending square index.</summary>
-    public string ToNotation(in GameState s) => Notation.Format(Geo, s);
+    /// <exception cref="ArgumentException">The position belongs to another board size.</exception>
+    public string ToNotation(in GameState s)
+    {
+        if (s.N != _n)
+        {
+            throw new ArgumentException($"A {s.N}×{s.N} position cannot be written with {_n}×{_n} rules.", nameof(s));
+        }
+
+        return Notation.Format(Geo, s);
+    }
 
     private string? FindProblem(UInt128 hounds, byte fox, Side sideToMove, byte n)
     {

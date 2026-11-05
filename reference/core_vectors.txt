@@ -4,6 +4,8 @@ NextInt(2147483647) x3 from seed 42: [180094358, 813853890, 1460382104]
 NextDouble x3 from seed 0: ['0.6012629994179048', '0.7477740925472398', '0.10301998939503632']
 ForGame(20261105, 17) NextU64 x2: ['0xf6a691e5ee4f5153', '0xe5e8859d59452f86']
 seed 7: Split() then NextU64 of each child: 0x214c58958ca2a8a5 0x82f0e307ada2dc5e
+Zobrist n=8 FoxKey[0], FoxKey[31], SideKey: 0xfb5ff89c958322bc 0x2453a2e2b9627ab 0xef40430cca1becbc
+uniform random plies from the 8x8 start with Rng(5): e1-d2 f8-e7 d2-c1 e7-d6 c1-d2 d6-c5 d2-c1 c5-b4 c1-b2 d8-c7 b2-c1 h8-g7 c1-b2 b4-a3
 
 8/a1/b2,b8,d8,f8/F       fox trapped in a corner by one hound
     ReachHomeRow adj off     HoundsWin FoxTrapped         escaped=False

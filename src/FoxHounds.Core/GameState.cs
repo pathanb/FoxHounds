@@ -55,7 +55,9 @@ public readonly struct GameState : IEquatable<GameState>
     public override bool Equals(object? obj) => obj is GameState other && Equals(other);
 
     /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(Hounds, Fox, SideToMove, N);
+    /// <remarks>Folds the Zobrist hash, which equal states share (spec 5.2). Unlike HashCode.Combine it is the same in
+    /// every process, so the iteration order of hash sets of positions is reproducible.</remarks>
+    public override int GetHashCode() => (int)Hash ^ (int)(Hash >> 32);
 
     /// <summary>Position notation (spec 5.6), for example 8/e1/b8,d8,f8,h8/F.</summary>
     public override string ToString() =>
