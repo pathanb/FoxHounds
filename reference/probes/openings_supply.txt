@@ -1,0 +1,24 @@
+8x8 Classic, fox first, adjudication off. Per opening length k:
+  distinct = distinct non-terminal positions after k plies (all 4 fox starts pooled)
+  H-won    = how many of those the solver rates hounds-won
+  P(H) uniform / noisy = chance one random opening lands hounds-won
+  k= 2: distinct      28  H-won     25  P(H) uniform 87.5000%  noisy(eps=0.1)  98.59%
+         after    10,000 raw draws, expected distinct H-won: uniform       25   noisy       24
+         after   100,000 raw draws, expected distinct H-won: uniform       25   noisy       25
+         after 1,000,000 raw draws, expected distinct H-won: uniform       25   noisy       25
+  k= 4: distinct     200  H-won    162  P(H) uniform 83.5034%  noisy(eps=0.1)  97.05%
+         after    10,000 raw draws, expected distinct H-won: uniform      162   noisy       74
+         after   100,000 raw draws, expected distinct H-won: uniform      162   noisy      114
+         after 1,000,000 raw draws, expected distinct H-won: uniform      162   noisy      160
+  k= 6: distinct     544  H-won    311  P(H) uniform 69.5261%  noisy(eps=0.1)  94.02%
+         after    10,000 raw draws, expected distinct H-won: uniform      308   noisy       66
+         after   100,000 raw draws, expected distinct H-won: uniform      311   noisy      117
+         after 1,000,000 raw draws, expected distinct H-won: uniform      311   noisy      174
+  k= 8: distinct   1,728  H-won    783  P(H) uniform 60.0240%  noisy(eps=0.1)  89.71%
+         after    10,000 raw draws, expected distinct H-won: uniform      750   noisy       78
+         after   100,000 raw draws, expected distinct H-won: uniform      783   noisy      148
+         after 1,000,000 raw draws, expected distinct H-won: uniform      783   noisy      240
+  k=10: distinct   3,137  H-won    777  P(H) uniform 47.8885%  noisy(eps=0.1)  85.19%
+         after    10,000 raw draws, expected distinct H-won: uniform      692   noisy       55
+         after   100,000 raw draws, expected distinct H-won: uniform      772   noisy       99
+         after 1,000,000 raw draws, expected distinct H-won: uniform      777   noisy      171

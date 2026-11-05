@@ -1,0 +1,164 @@
+# Decisions, open questions and recorded values
+
+This file is Section 17 of the [specification](spec/spec.md). Anything the spec does not cover, or gets
+wrong, is decided here **before** it goes into code. Where a decision below amends a spec section, the
+decision wins.
+
+## 17.1 Decision log
+
+D-01 to D-12 are the spec's own decisions, unchanged:
+
+| ID   | Decision (summary)                                                                    |
+|------|---------------------------------------------------------------------------------------|
+| D-01 | C# on .NET 10 LTS                                                                     |
+| D-02 | Raylib-cs with three home-made widgets, no raygui                                     |
+| D-03 | Hounds with no legal ply lose, under both win conditions                              |
+| D-04 | Default ruleset Classic: fox on e1, fox first, fox wins on reaching row 0             |
+| D-05 | H = ⌊n/2⌋, n = 4…16, odd n allowed                                                    |
+| D-06 | Rules is a concrete class; interfaces only at strategy points (IAgent, IEvaluator, IClock) |
+| D-07 | Immutable 32-byte GameState struct; ply count kept outside it                         |
+| D-08 | Escape adjudication on by default for play and experiments, always off in the solver  |
+| D-09 | Experiments use node or depth budgets and our own RNG only                            |
+| D-10 | No null-move pruning                                                                  |
+| D-11 | Solver = full-table potential-ordered sweep, 1 byte per position                      |
+| D-12 | Humans are not IAgents; the app handles their turns                                   |
+
+Decisions taken during the project (owner accepted all recommendations on 2026-11-05):
+
+**D-13 Project references (amends 4.2).** One `AgentFactory` must build minimax agents (Engine) and solver
+agents (Solver) for the app, the CLI and experiments, while Engine and Solver stay independent and the App
+may not reference Sim. A new library, `FoxHounds.Agents`, holds the factory, AgentSpec loading and
+`SolverEvaluator`. Test projects may also reference the libraries their oracle tests compare against.
+T-ARCH-01 enforces exactly this table:
+
+| Project                | May reference                               |
+|------------------------|---------------------------------------------|
+| FoxHounds.Core         | nothing                                     |
+| FoxHounds.Engine       | Core                                        |
+| FoxHounds.Solver       | Core                                        |
+| FoxHounds.Agents       | Core, Engine, Solver                        |
+| FoxHounds.Sim          | Core, Engine, Solver, Agents                |
+| FoxHounds.Tuning       | Core, Engine, Solver, Agents, Sim           |
+| FoxHounds.Cli (`fh`)   | all libraries                               |
+| FoxHounds.App          | Core, Engine, Solver, Agents                |
+| FoxHounds.Bench        | Core, Engine, Solver                        |
+| FoxHounds.Core.Tests   | Core                                        |
+| FoxHounds.Engine.Tests | Engine, Core, Solver, Agents (T-ENG-03)     |
+| FoxHounds.Solver.Tests | Solver, Core                                |
+| FoxHounds.Agents.Tests | Agents, Core                                |
+| FoxHounds.Sim.Tests    | Sim, Core                                   |
+| FoxHounds.Tuning.Tests | Tuning, Core                                |
+| FoxHounds.App.Tests    | App, Core (T-APP-01 tests GameSession)      |
+
+Nothing else references App or Cli.
+
+**D-14 Process (amends 4.3 CI and 16.2).** One developer (Claude) commits directly to `main` and tags each
+finished milestone (`m0` … `m8`). The GitHub Actions workflow exists but runs only when started by hand.
+Performance floors are measured on the development workspace (2 vCPU, 7 GB RAM, Linux x64); this answers
+Q-04. Instead of review by a second person, M1, M2 and M3 get an independent review by a fresh agent that
+has not seen the author's reasoning; other milestones are self-reviewed.
+
+**D-15 Opening sets (amends 11.2 and the 8.9 procedure).** `--plies` takes one value or a range `lo-hi`;
+each opening's length is drawn uniformly from the range. Competence runs use `6-16`. Evidence
+(`reference/probes/`): after exactly 6 plies there are only 544 distinct positions, 311 of them hounds-won,
+so 1,000 or 2,000 distinct 6-ply openings cannot exist. The premise in 11.2 is also reversed: 69.5% of
+uniform random 6-ply openings are hounds-won. The noisy-solver generator gives even fewer distinct positions
+(about 174 hounds-won after 10⁶ draws). Lengths 6–16 give 12,363 distinct hounds-won positions. The
+`noisySolver` generator stays available but is not the default.
+
+**D-16 SPSA update (amends 12.3).** The update runs in scaled coordinates:
+θᵢ ← θᵢ + a_k · sᵢ · (J⁺ − J⁻) / (2 · c_k · Δᵢ); the perturbation stays c_k · sᵢ · Δᵢ. Unless a tuning spec
+sets `a` explicitly, the gain is calibrated before iteration 0 (Spall 1998): ḡ = mean of |J⁺ − J⁻| / (2c₀)
+over 10 trial perturbations, then a = TargetStep · (A + 1)^0.602 / ḡ with TargetStep = 1, so the first
+steps move each weight by about one scale unit. Δ and the batch of iteration k come from one
+`Rng.ForGame(seed, k)` stream, Δ first. Evidence: with the original defaults (a = 1, A = 50, c = 2) and an
+objective in [0, 1], a weight moves less than one unit over 500 iterations even when every step agrees, so
+rounding returns the starting weights; and dividing by sᵢ made large weights move slower, the opposite of
+the stated intent.
+
+**D-17 Regression tuner scale (amends 12.2).** Optimise β = w / K (logit units): loss = mean cross-entropy
++ λ‖β‖² (λ = 1e−4, intercept not penalised), Adam on β with learning rate 0.01; output wᵢ = round(K · βᵢ).
+Evidence: on raw weights the penalty for lin-v0 alone is 7.0, against a cross-entropy that cannot exceed
+ln 2 ≈ 0.69 for a useful model, and Adam at 0.01 per step can move a raw weight only about 200 units.
+
+**D-18 Weight files and board size (amends 9.3 and 13.3).** `lin-v0` carries no `boardSize` (it is hand-set
+and applies to every n). Tuned files carry their `boardSize`. App presets use the default tuned file for the
+board size when one exists, otherwise `lin-v0`.
+
+**D-19 Compute budgets.** The SPSA GradeAccuracy objective grades with `maxNodes` 20,000 per position unless
+the tuning spec says otherwise. The HeadToHead objective is implemented but only smoke-tested (a default run
+is about 100,000 games). Long experiments run in resumable chunks. Competence baselines use the specified
+2,000,000 nodes per ply.
+
+**D-20 Determinism comparisons (amends T-SIM-01, T-SIM-02).** Wall-clock fields (`ms` in games.jsonl,
+`startedUtc` and `info.ms` in records, `AgentInfo.Elapsed`) are excluded when comparing runs.
+summary.json contains no wall-clock values.
+
+**D-21 Time limits in experiments (amends 11.3).** Agent specs may carry `hardTimeMs`. In an experiment it
+is only a watchdog: a game that ends in a timeout forfeit aborts the experiment with an error, so every
+completed run is reproducible. `softTimeMs` in an experiment still requires `allowNonDeterministic`.
+
+**D-22 Where budgets come from (amends 7.1 and 14.3).** The budget passed to `ChooseMove` is the AgentSpec's
+`budget`. An experiment spec may override it per role with `"budgets": { "fox": {…}, "hounds": {…} }`.
+
+**D-23 One random stream per agent (amends 7.3).** `GameRunner` gives each agent its own `Rng`, split from
+the game's `Rng` in the order fox, hounds. One agent's random draws can never shift the other's.
+
+**D-24 Exact RNG derivations (completes 5.5).** Results must be reproducible bit for bit, so the derived
+operations are fixed:
+- `NextInt(s)`: Lemire's multiply-shift with rejection. x = NextU64(); m = x · s (128-bit); l = low64(m);
+  if l < s then t = (2⁶⁴ − s) mod s and while l < t: redraw x, recompute m and l. Return high64(m).
+- `NextDouble()` = (NextU64() >> 11) · 2⁻⁵³.
+- `Split()` = new Rng(NextU64()).
+
+**D-25 Geometry tables are read-only (amends the 5.1 member types).** One cached `Geometry` per n is shared
+by every thread, so its tables are exposed as `ReadOnlySpan<T>` instead of public arrays.
+
+**D-26 Analyzer exceptions.** Listed in `.editorconfig` files, each with its reason. Currently: CA1707 (no
+underscores in names) is off in test projects, whose test names read as sentences.
+
+**D-27 Test platform (amends 4.1).** xunit.v3 4.0.2 (4.x is the current stable line since August 2026) on
+Microsoft.Testing.Platform, enabled in `global.json`; coverage through `coverlet.MTP`. The platform's v2 no
+longer supports the VSTest mode of `dotnet test` on the .NET 10 SDK.
+
+**D-28 Position suite (completes 11.2; provisional until M5).** Positions come from games between
+EpsilonAgent(ε = 0.15) wrapping MinimaxAgent(lin-v0, depth 4) on both sides, starting from D-15 openings.
+One position is sampled uniformly per game, with equal quotas per phase bucket × solver winner, split by
+hash into train 50,000 / validation 10,000 / test 20,000 on 8×8.
+
+**D-29 Time APIs are banned too (extends 4.3).** BannedSymbols.txt also bans `DateTime.Now/UtcNow/Today`,
+`DateTimeOffset.Now/UtcNow`, `Stopwatch` and `Environment.TickCount/TickCount64`. Only the system
+implementation of `IClock` suppresses the rule.
+
+**D-30 Rules.Create and Rules.CreateChecked (extends 6).** The solver, generators and tests need positions
+built from a hound set, a fox square and a side to move. Rules creates them: `Create` asserts validity in
+debug builds, `CreateChecked` validates and throws. "Only Rules creates states" still holds.
+
+**D-31 No legal plies in a finished game (completes 6).** `IsLegal` returns false for every ply of a
+position whose `Evaluate` is not Ongoing, so `ApplyChecked` rejects plies after the end of a game (needed
+by the load check in 14.2). `GenerateMoves` keeps its contract from 6.1 and does not check.
+
+## 17.2 Open questions, answered
+
+| ID   | Answer                                                                                   |
+|------|------------------------------------------------------------------------------------------|
+| Q-01 | Fixed start (e1) by default.                                                             |
+| Q-02 | No pass variant in v1.                                                                   |
+| Q-03 | Provisional targets stand until the M5 baseline.                                         |
+| Q-04 | The development workspace defines the performance floors (D-14).                        |
+| Q-05 | One developer, no dates; milestones in order.                                            |
+| Q-06 | Self-contained folders only.                                                             |
+| Q-07 | Build tables for n = 9–11 on first use, with a progress bar.                            |
+| —    | The optional PlayoutEvaluator (9.2) is not built in v1 unless the owner asks for it.     |
+
+## 17.3 Recorded values
+
+| Milestone | Value | Result |
+|-----------|-------|--------|
+| M1 | perft(10) time, Classic 8×8 | _pending_ |
+| M1 | plies generated per second | _pending_ |
+| M2 | solver build time, n = 8 | _pending_ |
+| M2 | solver build time and result, n = 10 (published: hounds win in 72) | _pending_ |
+| M3 | search nodes per second at fixed depth | _pending_ |
+| M5 | competence baseline for lin-v0 and the agreed 8.9 targets | _pending_ |
+| M6 | promoted weight files and their experiment ids | _pending_ |

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FoxHounds.Core\FoxHounds.Core.csproj" />
+    <ProjectReference Include="..\..\src\FoxHounds.Engine\FoxHounds.Engine.csproj" />
+    <ProjectReference Include="..\..\src\FoxHounds.Solver\FoxHounds.Solver.csproj" />
+  </ItemGroup>
+
+</Project>

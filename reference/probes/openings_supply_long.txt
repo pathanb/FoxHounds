@@ -1,0 +1,18 @@
+distinct hounds-won non-terminal positions at exactly k plies (8x8 Classic, fox first)
+ k   all 4 starts pooled   e1 start only
+ 2         25 of      28       12 of      14
+ 4        162 of     200      123 of     150
+ 6        311 of     544      311 of     544
+ 8        783 of   1,728      783 of   1,728
+10        777 of   3,137      777 of   3,137
+12      1,209 of   7,097    1,209 of   7,097
+14        846 of   8,542      846 of   8,542
+16      1,523 of  16,624    1,523 of  16,624
+18        952 of  17,022      952 of  17,022
+20      1,685 of  28,861    1,685 of  28,861
+lengths 6-12 pooled, all starts: 6,074 distinct hounds-won positions
+lengths 6-16 pooled, all starts: 12,363 distinct hounds-won positions
+lengths 8-20 pooled, all starts: 19,521 distinct hounds-won positions
+8/b4/b8,h8,e7,d6/F Fox wins in 7
+8/f2/f8,h8,e7,d6/F Fox wins in 15
+8/d2/b8,f8,e7,h6/F Fox wins in 11

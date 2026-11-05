@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FoxHounds.Tuning.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoxHounds.Core\FoxHounds.Core.csproj" />
+    <ProjectReference Include="..\FoxHounds.Engine\FoxHounds.Engine.csproj" />
+    <ProjectReference Include="..\FoxHounds.Solver\FoxHounds.Solver.csproj" />
+    <ProjectReference Include="..\FoxHounds.Agents\FoxHounds.Agents.csproj" />
+    <ProjectReference Include="..\FoxHounds.Sim\FoxHounds.Sim.csproj" />
+  </ItemGroup>
+
+</Project>

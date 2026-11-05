@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FoxHounds.Engine\FoxHounds.Engine.csproj" />
+    <ProjectReference Include="..\..\src\FoxHounds.Core\FoxHounds.Core.csproj" />
+    <ProjectReference Include="..\..\src\FoxHounds.Solver\FoxHounds.Solver.csproj" />
+    <ProjectReference Include="..\..\src\FoxHounds.Agents\FoxHounds.Agents.csproj" />
+  </ItemGroup>
+
+</Project>

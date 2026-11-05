@@ -1,0 +1,19 @@
+bin/
+obj/
+artifacts/
+BenchmarkDotNet.Artifacts/
+TestResults/
+coverage/
+*.user
+*.suo
+.vs/
+.idea/
+.vscode/
+*.swp
+__pycache__/
+
+# Solver tables are rebuilt on demand (spec 10.6) and never committed.
+*.fhsolv
+
+# Experiment output folders (spec 11.4) unless deliberately committed under docs/.
+/runs/

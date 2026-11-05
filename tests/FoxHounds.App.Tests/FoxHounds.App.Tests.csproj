@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FoxHounds.App\FoxHounds.App.csproj" />
+    <ProjectReference Include="..\..\src\FoxHounds.Core\FoxHounds.Core.csproj" />
+  </ItemGroup>
+
+</Project>

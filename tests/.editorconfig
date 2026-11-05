@@ -1,0 +1,4 @@
+# Test projects only (decision D-26).
+[*.cs]
+# Test names read as sentences: Perft_matches_reference_vectors.
+dotnet_diagnostic.CA1707.severity = none

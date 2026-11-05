@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FoxHounds.Engine.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoxHounds.Core\FoxHounds.Core.csproj" />
+  </ItemGroup>
+
+</Project>

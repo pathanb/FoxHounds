@@ -1,0 +1,45 @@
+# Build, test and format check on Windows and Linux (spec 4.3).
+# Manual trigger only (decision D-14), so it never spends Actions minutes unless started from the Actions tab.
+name: ci
+
+on:
+  workflow_dispatch:
+    inputs:
+      slow:
+        description: Also run the long tests (trait Category=Slow)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release)
+        run: dotnet build --no-restore -c Release
+
+      - name: Test (fast)
+        if: ${{ !inputs.slow }}
+        run: dotnet test --no-build -c Release --filter "Category!=Slow"
+
+      - name: Test (all, including slow)
+        if: ${{ inputs.slow }}
+        run: dotnet test --no-build -c Release
+
+      - name: Format check
+        run: dotnet format --verify-no-changes --no-restore

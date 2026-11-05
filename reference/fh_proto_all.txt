@@ -1,0 +1,59 @@
+splitmix64(0) first: 0xe220a8397b1dcdaf
+xoshiro256** seed 0: ['0x99ec5f36cb75f2b4', '0xbf6e1f784956452a', '0x1a5f849d4933e6e0']
+xoshiro256** seed 42: ['0x15780b2e0c2ec716', '0x6104d9866d113a7e', '0xae17533239e499a1']
+Zobrist n=8 HoundKey[0], HoundKey[1]: ['0x9ca8a164477d7801', '0xb0643a4e15e67e01']
+Classic  n=4 fox first: a1: Hounds win in 8; c1: Hounds win in 8
+Classic  n=4 hounds first: a1: Hounds win in 7; c1: Hounds win in 7
+Gilith   n=4 fox first: a1: Hounds win in 8; c1: Hounds win in 8
+Gilith   n=4 hounds first: a1: Hounds win in 7; c1: Hounds win in 7
+Classic  n=5 fox first: b1: Fox wins in 7; d1: Fox wins in 7
+Classic  n=5 hounds first: b1: Fox wins in 8; d1: Fox wins in 8
+Gilith   n=5 fox first: b1: Fox wins in 17; d1: Fox wins in 17
+Gilith   n=5 hounds first: b1: Fox wins in 16; d1: Fox wins in 16
+Classic  n=6 fox first: a1: Fox wins in 25; c1: Fox wins in 25; e1: Fox wins in 25
+Classic  n=6 hounds first: a1: Hounds win in 21; c1: Hounds win in 21; e1: Hounds win in 21
+Gilith   n=6 fox first: a1: Fox wins in 31; c1: Fox wins in 31; e1: Fox wins in 31
+Gilith   n=6 hounds first: a1: Hounds win in 21; c1: Hounds win in 21; e1: Hounds win in 21
+Classic  n=7 fox first: b1: Fox wins in 15; d1: Fox wins in 15; f1: Fox wins in 15
+Classic  n=7 hounds first: b1: Fox wins in 12; d1: Fox wins in 12; f1: Fox wins in 12
+Gilith   n=7 fox first: b1: Fox wins in 37; d1: Fox wins in 37; f1: Fox wins in 37
+Gilith   n=7 hounds first: b1: Fox wins in 36; d1: Fox wins in 36; f1: Fox wins in 36
+Classic  n=8 fox first: a1: Hounds win in 44; c1: Hounds win in 44; e1: Hounds win in 44; g1: Hounds win in 44
+Classic  n=8 hounds first: a1: Hounds win in 43; c1: Hounds win in 43; e1: Hounds win in 43; g1: Hounds win in 43
+Gilith   n=8 fox first: a1: Hounds win in 44; c1: Hounds win in 44; e1: Hounds win in 44; g1: Hounds win in 44
+Gilith   n=8 hounds first: a1: Hounds win in 43; c1: Hounds win in 43; e1: Hounds win in 43; g1: Hounds win in 43
+Classic n=4 fox c1: perft 1..10 = [2, 6, 13, 27, 30, 60, 126, 170, 266, 110]
+longest game n=4: 13 plies
+Classic n=6 fox c1: perft 1..10 = [2, 10, 40, 168, 418, 1730, 5917, 23818, 56283, 228556]
+longest game n=6: 31 plies
+Classic n=8 fox e1: perft 1..10 = [2, 14, 56, 344, 1032, 6264, 23387, 141427, 442493, 2674123]
+longest game n=8: 57 plies
+Classic adj off  n=4: reachable 114 (terminal 27)
+Classic adj on   n=4: reachable 88 (terminal 20)
+Gilith           n=4: reachable 132 (terminal 18)
+Classic adj off  n=5: reachable 546 (terminal 74)
+Classic adj on   n=5: reachable 407 (terminal 74)
+Gilith           n=5: reachable 593 (terminal 26)
+Classic adj off  n=6: reachable 10,357 (terminal 1,027)
+Classic adj on   n=6: reachable 8,705 (terminal 1,099)
+Gilith           n=6: reachable 11,349 (terminal 193)
+Classic adj off  n=7: reachable 37,583 (terminal 2,619)
+Classic adj on   n=7: reachable 31,182 (terminal 3,742)
+Gilith           n=7: reachable 40,226 (terminal 199)
+Classic adj off  n=8: reachable 895,280 (terminal 61,945)
+Classic adj on   n=8: reachable 783,184 (terminal 76,674)
+Gilith           n=8: reachable 957,529 (terminal 6,115)
+escape soundness ReachHomeRow   n=4: fired 68, unsound 0
+escape soundness HoundsImmobile n=4: fired 83, unsound 0
+escape soundness ReachHomeRow   n=6: fired 10,159, unsound 0
+escape soundness HoundsImmobile n=6: fired 9,621, unsound 0
+escape soundness ReachHomeRow   n=8: fired 1,003,459, unsound 0
+escape soundness HoundsImmobile n=8: fired 909,248, unsound 0
+8/e1/b8,d8,f8,h8/F {'FoxAdvance': 0, 'FoxMobility': 2, 'HoundMobility': 7, 'FoxRegion': 27, 'GoalReachable': 0, 'GoalCloseness': 0, 'HoundsPassed': 0, 'HoundSpread': 0, 'HoundMovesLeft': 28, 'EscapeDistance': 7, 'FoxToMove': 1} solver: Hounds win in 44
+8/d4/a7,c7,e7,f6/H {'FoxAdvance': 3, 'FoxMobility': 4, 'HoundMobility': 6, 'FoxRegion': 25, 'GoalReachable': 1, 'GoalCloseness': 2, 'HoundsPassed': 0, 'HoundSpread': 1, 'HoundMovesLeft': 23, 'EscapeDistance': 3, 'FoxToMove': 0} solver: Hounds win in 33
+8/c5/b6,d6,f6,h6/F {'FoxAdvance': 4, 'FoxMobility': 2, 'HoundMobility': 5, 'FoxRegion': 19, 'GoalReachable': 0, 'GoalCloseness': 0, 'HoundsPassed': 0, 'HoundSpread': 0, 'HoundMovesLeft': 20, 'EscapeDistance': 1, 'FoxToMove': 1} solver: Hounds win in 28
+8/g3/b6,d6,e5,g5/F {'FoxAdvance': 2, 'FoxMobility': 4, 'HoundMobility': 7, 'FoxRegion': 17, 'GoalReachable': 0, 'GoalCloseness': 0, 'HoundsPassed': 0, 'HoundSpread': 1, 'HoundMovesLeft': 18, 'EscapeDistance': 3, 'FoxToMove': 1} solver: Hounds win in 22
+
+real	3m31.169s
+user	3m22.359s
+sys	0m5.702s

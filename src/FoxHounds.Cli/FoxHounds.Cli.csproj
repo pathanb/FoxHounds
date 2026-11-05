@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>fh</AssemblyName>
+    <RootNamespace>FoxHounds.Cli</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoxHounds.Core\FoxHounds.Core.csproj" />
+    <ProjectReference Include="..\FoxHounds.Engine\FoxHounds.Engine.csproj" />
+    <ProjectReference Include="..\FoxHounds.Solver\FoxHounds.Solver.csproj" />
+    <ProjectReference Include="..\FoxHounds.Agents\FoxHounds.Agents.csproj" />
+    <ProjectReference Include="..\FoxHounds.Sim\FoxHounds.Sim.csproj" />
+    <ProjectReference Include="..\FoxHounds.Tuning\FoxHounds.Tuning.csproj" />
+  </ItemGroup>
+
+</Project>

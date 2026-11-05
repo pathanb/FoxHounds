@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>FoxHounds</AssemblyName>
+    <RootNamespace>FoxHounds.App</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FoxHounds.App.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Raylib-cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoxHounds.Core\FoxHounds.Core.csproj" />
+    <ProjectReference Include="..\FoxHounds.Engine\FoxHounds.Engine.csproj" />
+    <ProjectReference Include="..\FoxHounds.Solver\FoxHounds.Solver.csproj" />
+    <ProjectReference Include="..\FoxHounds.Agents\FoxHounds.Agents.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+# Normalise line endings so golden files and dotnet format behave the same on Windows and Linux.
+* text=auto eol=lf
+
+*.png binary
+*.docx binary
+*.fhsolv binary
