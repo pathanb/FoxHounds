@@ -16,5 +16,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="FoxHounds.TestSupport" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared/**/*.cs" LinkBase="Shared" />
   </ItemGroup>
 </Project>

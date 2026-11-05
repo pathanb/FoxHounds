@@ -160,8 +160,9 @@ by the load check in 14.2). `GenerateMoves` keeps its contract from 6.1 and does
 |-----------|-------|--------|
 | M1 | perft(10) time, Classic 8×8 | 16.0 ms (floor: 1 s). BenchmarkDotNet ShortRun, Release, .NET 10.0.14, 2-vCPU Xeon 2.1 GHz; report in docs/benchmarks/M1-perft.md |
 | M1 | plies generated per second | about 205 million (perft(10) generates 3,289,142 plies, counting the leaves, in 16.0 ms) |
-| M2 | solver build time, n = 8 | _pending_ |
-| M2 | solver build time and result, n = 10 (published: hounds win in 72) | _pending_ |
+| M2 | solver build time, n = 8 | 149 ms single-threaded (floor: 10 s); BenchmarkDotNet ShortRun, docs/benchmarks/M2-solver.md |
+| M2 | solver build time and result, n = 10 (published: hounds win in 72) | 9–10 s on 2 threads, 212 MB. Gilith: hounds win in 72 from every start (matches the published solve); Classic: hounds win in 72 (fox first) / 71 (hounds first) |
+| M2 | other sizes (2 threads, Release) | n = 9: 0.6 s; Classic fox wins in 27 / 40, Gilith fox wins in 65 / 64. n = 11: 31–63 s, 655 MB; Classic fox wins in 51 / 48, Gilith fox wins in 101 / 100 (fox first / hounds first). Under HoundsImmobile every odd board is a fox win in exactly MaxPlies |
 | M3 | search nodes per second at fixed depth | _pending_ |
 | M5 | competence baseline for lin-v0 and the agreed 8.9 targets | _pending_ |
 | M6 | promoted weight files and their experiment ids | _pending_ |

@@ -9,6 +9,7 @@ internal static class Program
         var root = new RootCommand("fh: Fox and Hounds tools")
         {
             PerftCommand.Create(),
+            SolveCommand.Create(),
         };
 
         try
@@ -16,7 +17,7 @@ internal static class Program
             // Our handler below prints one clean line for expected input errors instead of a stack trace.
             return root.Parse(args).Invoke(new InvocationConfiguration { EnableDefaultExceptionHandler = false });
         }
-        catch (Exception ex) when (ex is ArgumentException or FormatException or InvalidOperationException)
+        catch (Exception ex) when (ex is ArgumentException or FormatException or InvalidOperationException or NotSupportedException or IOException)
         {
             Console.Error.WriteLine($"error: {ex.Message}");
             return 2;

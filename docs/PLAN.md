@@ -9,7 +9,7 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 |-----------|-------|--------|
 | M0 Setup | solution skeleton, build rules, package pins, banned APIs, CI workflow, T-ARCH-01 | done (e6eaf99) |
 | M1 Rules core | Geometry, RuleSet, Rules, GameState, Move, Zobrist, Rng, notation, GameRunner, RandomAgent, `fh perft`; T-CORE-01…08 | in review |
-| M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | not started |
+| M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | in review |
 | M3 Search and evaluation | features, evaluators, weight files, search stages A and B, MinimaxAgent; T-ENG-01…04, T-EVAL-01…03 | not started |
 | M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | not started |
 | M5 Simulation harness | stage C search, openings and suites, experiment modes, statistics, `fh match/grade/report`; T-ENG-05…06, T-SIM-01…03 | not started |
@@ -63,3 +63,6 @@ The desktop app can be run headless for screenshots with `xvfb-run -a -s "-scree
   recorded here instead of as tags.
 - 2026-11-05: M1 implemented: all T-CORE tests pass (perft, reachable rules, Zobrist, notation, RNG vectors,
   game length); Core line coverage 93%. perft(10) = 16 ms. Independent review pending (D-14).
+- 2026-11-05: M2 implemented. Every byte of the 4×4…8×8 tables (both win conditions) agrees with tables built
+  independently by the prototype (reference/solver_table_digests.txt); 800 random-position values agree; 10×10
+  reproduces the published "hounds win in 72". 8×8 build 149 ms single-threaded; Solver coverage 97%.
