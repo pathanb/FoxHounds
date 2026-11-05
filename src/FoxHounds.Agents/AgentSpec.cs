@@ -117,7 +117,7 @@ public sealed record AgentSpec
                 throw new InvalidDataException($"{source}: rootSelection must be best or randomAmongBest, not '{search.RootSelection}'.");
             }
 
-            if (search.TtMegabytes < 0 || search.Margin < 0)
+            if (search.TtMegabytes is < 0 || search.Margin < 0)
             {
                 throw new InvalidDataException($"{source}: ttMegabytes and margin cannot be negative.");
             }
@@ -155,8 +155,8 @@ public sealed record EvaluatorSpec
 /// <summary>Search part of an agent spec.</summary>
 public sealed record SearchSpec
 {
-    /// <summary>Transposition table size.</summary>
-    public int TtMegabytes { get; set; } = 64;
+    /// <summary>Transposition table size; null means the factory's default (64 MB in the app, 16 MB in experiments).</summary>
+    public int? TtMegabytes { get; set; }
 
     /// <summary>best or randomAmongBest.</summary>
     public string RootSelection { get; set; } = "best";

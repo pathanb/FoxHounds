@@ -11,8 +11,8 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M1 Rules core | Geometry, RuleSet, Rules, GameState, Move, Zobrist, Rng, notation, GameRunner, RandomAgent, `fh perft`; T-CORE-01…08 | done (dbae502, after review fixes) |
 | M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | done (dbae502, after review fixes) |
 | M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | done (483fc43, after review fixes) |
-| M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | done (see log; hash recorded with the next commit) |
-| M5 Simulation harness | stage C search, openings and suites, experiment modes, statistics, `fh match/grade/report`; T-ENG-05…06, T-SIM-01…03 | not started |
+| M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | done (be7f77c) |
+| M5 Simulation harness | openings and suites, experiment modes, statistics, `fh openings/suite/match/grade/report`; T-ENG-05, T-SIM-01…03; 8.9 baseline | done (see log; targets await Q-08) |
 | M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02 | not started |
 | M7 Replay and analysis | viewer, solver colouring, analyse, play from here | not started |
 | M8 Hardening | n = 10 solver, self-contained builds, user guide | not started |
@@ -40,6 +40,11 @@ dotnet format --verify-no-changes               # format check, as in CI
 dotnet run --project src/FoxHounds.Cli -c Release -- perft --n 8 --depth 10
 dotnet run --project bench/FoxHounds.Bench -c Release -- --filter '*'
 dotnet run --project src/FoxHounds.App -c Release             # the game; --data DIR, --load FILE.fhg, --size WxH
+fh openings --n 8 --plies 6-16 --count 1000 --seed 7 --label --filter HoundsWon --out openings.txt
+fh suite --n 8 --seed 11 --max-games 10000000 --out-dir experiments/suites/n8   # D-28 suite, about 15 min on 2 cores
+fh match experiments/m5-hounds-conversion.json --out runs/m5-hounds        # rerun the same command to resume
+fh grade experiments/m5-grade-lin-v0.json --out runs/m5-grade
+fh report runs/m5-hounds [runs/other]
 python3 reference/fh_proto.py all               # reference tables, about 4 minutes
 ```
 
@@ -102,3 +107,8 @@ What could be checked without a screen was checked headlessly; the owner's hands
   undo/redo, save/load and AI-vs-AI with pause and delay (D-44 … D-52). T-APP-01 found one real bug, the source
   generator filling init-only properties (D-52), which had broken the Easy and Medium presets. Coverage:
   GameSession 93%, Layout 97%, Agents 91%; the Raylib drawing code is checked with headless screenshots instead.
+- 2026-11-05: M5 done. The simulation harness runs all four modes with deterministic, resumable output (T-SIM-01
+  for 1 and 8 workers, T-SIM-02 by cancellation and by game cap, D-53 … D-59). The first competence baseline
+  (D-60, docs/benchmarks/M5-competence.md) meets every 8.9 target at 2,000,000 nodes, with no error; mistakes appear
+  below about 100,000 nodes. The D-28 suite came out at 34,370 / 6,872 / 13,757 positions, since some strata are
+  rare. Open for the owner: Q-08, which targets to keep.

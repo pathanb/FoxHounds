@@ -1,0 +1,6 @@
+{
+  "format": "agent/1",
+  "type": "solver",
+  "name": "solver",
+  "randomTies": true
+}

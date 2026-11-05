@@ -1,0 +1,1 @@
+{ "format": "agent/1", "type": "minimax", "name": "lin-v0-100000", "evaluator": { "type": "linear" }, "search": { "rootSelection": "best" }, "budget": { "maxNodes": 100000 } }

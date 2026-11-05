@@ -48,7 +48,11 @@ public sealed class AgentSpecTests
         Assert.Equal("best", spec.Search!.RootSelection);
         Assert.Equal(4, spec.Search.TtMegabytes);
         Assert.Equal("linear", spec.Evaluator!.Type);
-        Assert.Equal(64, AgentSpec.Parse("""{ "type": "minimax", "name": "x", "search": {} }""").Search!.TtMegabytes);
+        var unset = AgentSpec.Parse("""{ "type": "minimax", "name": "x", "search": {} }""");
+        Assert.Null(unset.Search!.TtMegabytes);
+        Assert.Equal(64, Factory.TtMegabytesOf(unset));                          // the app's default
+        Assert.Equal(16, new AgentFactory(Tables) { DefaultTtMegabytes = 16 }.TtMegabytesOf(unset)); // experiments'
+        Assert.Equal(0, Factory.TtMegabytesOf(Preset("perfect")));
 
         var agent = Assert.IsType<MinimaxAgent>(Factory.Create(AgentSpec.Parse("""{ "type": "minimax", "name": "x", "search": { "ttMegabytes": 1 } }"""), new Rules(RuleSet.Classic), null, Ct));
         Assert.Equal(RootSelection.Best, agent.Options.RootSelection);

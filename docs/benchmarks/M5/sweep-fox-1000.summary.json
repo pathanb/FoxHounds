@@ -1,0 +1,70 @@
+{
+  "format": "summary/1",
+  "id": "m5-sweep-fox-1000",
+  "mode": "vsReference",
+  "sha256": "5f06458ae8396f31e4c825ec615647c58702c34068aa890fc728b0a9dfb69082",
+  "planned": 1000,
+  "done": 1000,
+  "complete": true,
+  "agents": {
+    "candidate": {
+      "name": "lin-v0-1000",
+      "fox": {
+        "games": 1000,
+        "wins": {
+          "successes": 979,
+          "trials": 1000,
+          "rate": 0.979,
+          "low": 0.968109,
+          "high": 0.986224
+        },
+        "conversion": {
+          "successes": 979,
+          "trials": 1000,
+          "rate": 0.979,
+          "low": 0.968109,
+          "high": 0.986224
+        },
+        "blunders": {
+          "successes": 21,
+          "trials": 4796,
+          "rate": 0.004379,
+          "low": 0.002866,
+          "high": 0.006685
+        },
+        "moves": 5026,
+        "nodes": 2298710,
+        "nodesPerMove": 457.363709,
+        "forfeits": 0
+      }
+    },
+    "reference": {
+      "name": "solver",
+      "hounds": {
+        "games": 1000,
+        "wins": {
+          "successes": 21,
+          "trials": 1000,
+          "rate": 0.021,
+          "low": 0.013776,
+          "high": 0.031891
+        },
+        "blunders": {
+          "successes": 0,
+          "trials": 251,
+          "rate": 0,
+          "low": 0,
+          "high": 0.015074
+        },
+        "moves": 4550,
+        "nodes": 0,
+        "nodesPerMove": 0,
+        "forfeits": 0
+      }
+    }
+  },
+  "openings": {
+    "foxWon": 1000,
+    "houndsWon": 0
+  }
+}

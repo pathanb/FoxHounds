@@ -1,0 +1,12 @@
+{
+  "format": "experiment/1",
+  "id": "m5-grade-lin-v0-20k-test",
+  "seed": 20261107,
+  "ruleSet": "classic",
+  "boardSize": 8,
+  "mode": "grade",
+  "agents": { "candidate": "agents/lin-v0-20k.json" },
+  "suite": "suites/n8/test.txt",
+  "workers": 0,
+  "maxMemoryMb": 4096
+}

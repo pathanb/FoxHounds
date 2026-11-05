@@ -1,0 +1,14 @@
+{
+  "format": "experiment/1",
+  "id": "m5-fox-conversion-openings-lin-v0",
+  "seed": 20261108,
+  "ruleSet": "classic",
+  "boardSize": 8,
+  "mode": "vsReference",
+  "agents": { "candidate": "agents/lin-v0-2m.json", "reference": "agents/solver.json" },
+  "candidateSide": "fox",
+  "openings": "openings/n8-p6-16-foxWon-1000.txt",
+  "workers": 0,
+  "maxMemoryMb": 4096,
+  "saveRecords": "blundersAndSample"
+}

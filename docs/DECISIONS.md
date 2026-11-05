@@ -266,6 +266,72 @@ type, so a field missing from the JSON got default(T) instead of its initializer
 broke the Easy and Medium presets (found by T-APP-01). The parts of agent/1 specs therefore use `set` accessors, and
 a test pins their defaults. Agent specs and game records also reject duplicate keys, like weight files (D-42).
 
+Simulation harness (M5):
+
+**D-53 Experiment specs (completes 14.3).** Each entry under `agents` is a path to an agent/1 file or an inline
+agent/1 object. Roles per mode: `candidate` and `reference` (vsReference), `a` and `b` (headToHead), `candidate` and
+`opponents` (a list; gauntlet), `candidate` (grade, whose positions come from `suite`). The spec hash covers the
+rules, seed, mode, agents (with the SHA-256 of any weight file), the positions file's content, the per-side budgets,
+the SPRT settings and the record policy, but not `workers`, `maxGames` or `maxMemoryMb`: a run can be resumed with
+more workers, or grown by resuming with a larger cap. An agent spec without `ttMegabytes` takes the context's
+default, 16 MB in experiments (11.3) and 64 MB in the app. `keepTtBetweenGames`, like a soft time limit, needs
+`allowNonDeterministic`, since the results would depend on which worker played which game. `sprt` is for headToHead.
+
+**D-54 Output in game order (refines 11.3).** Games are appended to games.jsonl in game-index order: a game that
+finishes early waits in memory until the games before it are written. So games.jsonl is the same for every worker
+count, a stopped run leaves a contiguous prefix, and a resume simply continues it; a cut-off last line is dropped
+and that game is played again. The SPRT is checked on pairs in that order, so it stops at the same pair with any
+worker count, and games past the stopping point are discarded. Records are written by the same writer, and
+summary.json is rewritten after every session, finished or not.
+
+**D-55 Line and summary fields (completes 14.4, 11.4).** Each line adds `foxRole` and `houndsRole`, `wonPlies` and
+`moves` per side (the denominators of the blunder rate and nodes per move) and `forfeit`. summary.json holds, per
+agent and side: games, wins, conversion, blunders (successes = blunders, trials = plies made in won positions),
+moves, nodes, nodes per move and forfeits, every proportion with its Wilson interval; per head-to-head pairing:
+pairs, score, Elo and their intervals, and the SPRT state; in grade mode: accuracy and resistance per side. Numbers
+are rounded to 6 decimals, and an infinite Elo is written as the string "inf" or "-inf".
+
+**D-56 Opening and suite files (completes 11.2, 14.5).** The ruleset comment is written as JSON
+(`# ruleSet={…}`); the 14.5 form (`classic adjudicateEscape=false`) is read as well. Loading checks the board size
+and win condition against the experiment's. Labels are the solver's, solved with adjudication off (10.6); an
+experiment that adjudicates escapes gets the same winners (T-SOL-04). The opening generator draws from one stream
+seeded by `--seed`, picks each opening's length uniformly from the range, uses the start squares in turn under
+ChooseOnBackRow, and checks duplicates before the filter. Suites (D-28) use equal-width phase buckets of
+HoundMovesLeft (0–7, 8–14, 15–21, 22–28 on 8×8), draw one position per game uniformly from the positions before the
+end, and split by Zobrist hash, so a position can only ever be in one split. The late bucket is rare, about one game
+in 200 yields a position for it, so the full 80,000-position suite takes millions of games.
+
+**D-57 Grade mode (completes 11.1, 11.5).** The candidate chooses one ply per suite position, after `NewGame` with
+the stream of the position's index. Accuracy counts won positions where the ply keeps the win; resistance counts
+lost positions where its loss distance equals the longest available. A suite label that disagrees with the solver
+stops the run: the suite was made for other rules.
+
+**D-58 Forfeits in experiments (refines 7.3, D-21).** A watchdog timeout stops the run with an error, as D-21
+says. Other forfeits (an agent that throws or plays an illegal ply) are results like any other: the summary counts
+them per side, and the run goes on.
+
+**D-59 T-ENG-05 golden file.** 50 positions from random play whose result is not proven at the searched depth: 30
+on 8×8 at depth 10, 10 on 10×10 at depth 8, and 10 on 16×16 at depth 7, the 128-bit path. lin-v0 with a 4 MB
+table; 331,777 nodes in all. The file is regenerated only on purpose, with `FH_WRITE_GOLDEN=1`, and the commit says
+why.
+
+**D-60 First competence baseline, and what it means for M6 (8.9, amends D-28).** Measured on 8×8 Classic
+against the solver (details in docs/benchmarks/M5-competence.md). At the default UI budget of 2,000,000 nodes per
+ply, lin-v0 converts 1,000 of 1,000 hounds-won openings and every fox-won test position and opening, with no
+blunder in 17,158 hound plies and 7,793 fox plies made in won positions. The provisional targets are met with room
+to spare and cannot tell agents apart at that budget. The hounds' searches average 202,000 nodes per move: most
+stop early on a proof (D-39). lin-v0 first makes mistakes below about 100,000 nodes: hounds conversion is 89.6% at
+1,000 nodes, 98.4% at 5,000 and 98.8% at 20,000. Grade accuracy at 20,000 nodes (the SPSA objective of D-19) is
+99.73% on the test split, 22 errors in 8,074 won positions, too few to steer a tuner. Until the owner agrees
+targets (open question Q-08), measurements for M6 use 1,000–20,000 nodes per ply, where the errors are. The fox
+side hardly tests the evaluator in Classic, because fox wins are mostly escapes within a few plies.
+
+D-28 is amended by the suite run. In 10,000,000 games (28 minutes on 2 cores) the equal quotas could not all be
+filled. The late phase (HoundMovesLeft 0–7, both winners) and the hounds-won strata of phases 1 and 3 ran short:
+hound wins usually end, and fox wins escape, before the hounds use up their moves, and early hounds-won positions
+are few and repeat. The suite keeps what was found: train 34,370, validation 6,872, test 13,757. It is committed
+under `experiments/suites/n8/` and can be regenerated exactly with the command in its header.
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |
@@ -278,6 +344,7 @@ a test pins their defaults. Agent specs and game records also reject duplicate k
 | Q-06 | Self-contained folders only.                                                             |
 | Q-07 | Build tables for n = 9–11 on first use, with a progress bar.                            |
 | —    | The optional PlayoutEvaluator (9.2) is not built in v1 unless the owner asks for it.     |
+| Q-08 | _Open._ After the M5 baseline (D-60): which 8.9 targets should stand, given that lin-v0 meets all three with no error at 2,000,000 nodes? |
 
 ## 17.3 Recorded values
 
@@ -290,5 +357,6 @@ a test pins their defaults. Agent specs and game records also reject duplicate k
 | M2 | other sizes (2 threads, Release) | n = 9: 0.6 s; Classic fox wins in 27 / 40, Gilith fox wins in 65 / 64. n = 11: 31–63 s, 655 MB; Classic fox wins in 51 / 48, Gilith fox wins in 101 / 100 (fox first / hounds first). Under HoundsImmobile every odd board is a fox win in exactly MaxPlies |
 | M3 | search nodes per second at fixed depth | 10.9 M nodes/s: depth 10 on the 20 benchmark positions, 1 MB table, 9.31 ms per pass (docs/benchmarks/M3-search.md). A 15.7M-node search from the 8×8 start proves "hounds win in 44" in 2.2–2.5 s (6.4–7.0 M nodes/s) |
 | M3 | evaluation cost (spec 9.4) | 50 ns per lin-v0 evaluation, 36 ns of it the flood fill (64-bit path for n ≤ 11; 86 ns before). Leaves are 35% of nodes, so evaluation is about 19% of search time in the benchmark profile: the SHOULD target of 10% is not met. A shift-based flood fill measured slower (80 ns); an evaluation cache is the next candidate, to try with the M5 harness |
-| M5 | competence baseline for lin-v0 and the agreed 8.9 targets | _pending_ |
+| M5 | competence baseline for lin-v0 (8.9) | At 2,000,000 nodes per ply, 8×8 Classic vs solver: hounds conversion 100.0% [99.62, 100] (1000/1000 hounds-won D-15 openings); fox conversion 100.0% [99.62, 100] from 1,000 fox-won test-split positions and from 1,000 fox-won openings; blunders 0/17,158 (hounds) and 0/7,793 (fox). Budget sweep and grade results in docs/benchmarks/M5-competence.md; see D-60 |
+| M5 | agreed 8.9 targets | _awaiting the owner (Q-08)_; proposed: keep the three targets at 2,000,000 nodes, and track the hounds conversion at 20,000 nodes (98.8% for lin-v0) as the development metric |
 | M6 | promoted weight files and their experiment ids | _pending_ |

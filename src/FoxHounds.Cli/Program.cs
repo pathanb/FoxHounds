@@ -11,6 +11,11 @@ internal static class Program
             PerftCommand.Create(),
             SolveCommand.Create(),
             AnalyseCommand.Create(),
+            OpeningsCommand.Create(),
+            SuiteCommand.Create(),
+            MatchCommand.Create(grade: false),
+            MatchCommand.Create(grade: true),
+            ReportCommand.Create(),
         };
 
         try

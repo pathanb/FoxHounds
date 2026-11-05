@@ -35,6 +35,16 @@ public sealed class AgentFactory
     /// <summary>The solver tables this factory uses.</summary>
     public SolverTableStore Tables => _tables;
 
+    /// <summary>Table size for a spec that does not set one: 64 MB, or 16 MB in experiments (spec 11.3).</summary>
+    public int DefaultTtMegabytes { get; init; } = 64;
+
+    /// <summary>The transposition table, in megabytes, an agent built from <paramref name="spec"/> uses (0: none).</summary>
+    public int TtMegabytesOf(AgentSpec spec)
+    {
+        ArgumentNullException.ThrowIfNull(spec);
+        return spec.Type == Minimax ? spec.Search?.TtMegabytes ?? DefaultTtMegabytes : 0;
+    }
+
     /// <summary>Builds the agent described by <paramref name="spec"/> for games under <paramref name="rules"/>.</summary>
     /// <param name="spec">The agent.</param>
     /// <param name="rules">The game's rules: weights must fit its board size, and solver agents need its table.</param>
@@ -79,7 +89,7 @@ public sealed class AgentFactory
         var search = spec.Search ?? new SearchSpec();
         var options = new SearchOptions
         {
-            TtMegabytes = search.TtMegabytes,
+            TtMegabytes = search.TtMegabytes ?? DefaultTtMegabytes,
             RootSelection = JsonNames.Parse<RootSelection>(search.RootSelection, "rootSelection"),
             Margin = search.Margin,
             KeepTtBetweenGames = search.KeepTtBetweenGames,
