@@ -368,6 +368,57 @@ docs/benchmarks/M6-tuning.md.
 lin-s1-n8 is therefore not promoted, and lin-v0 stays the default. No default-weights lookup (D-18) is built until a
 file is promoted. The owner decides step 5 and can overrule (Q-09).
 
+Replay and analysis (M7):
+
+**D-63 The replay and analysis viewer (completes 13.5; amends D-49 and D-51).**
+
+- **Opening it.** The viewer opens on the current game: the one just finished, or a record loaded with Load. It is
+  reached from the Replay button in the panel or in the game-over banner, and `--replay FILE` opens a record
+  straight in it. It opens at the last ply.
+- **The game stands still.** While the viewer is open, a running search is cancelled, no AI turn starts, and board
+  clicks, undo and redo do nothing. Back to game (or Esc) resumes the game. Loading or starting a game closes the
+  viewer.
+- **Moving.** ←/→ step one ply, with key repeat. Home and End jump to either end. Clicking a ply in the move list
+  shows the position after it.
+- **The panel** describes the ply that led to the shown position: its number, the solver's class for it, the stored
+  agent info (score, depth, nodes and time, or human, solver or random), and the line. It also shows the position in
+  5.6 notation; Ctrl+C copies it for `fh analyse`.
+- **Solver colours.** Every legal ply of the shown position gets a marker in its target square.
+  - The marker is shifted towards the moving piece, so two hounds that can reach one square get two markers.
+  - The ply the game went on with is ringed. Without a table, that next ply is drawn in blue instead.
+  - Distances are the table's, which is solved without escape adjudication (spec 10.1). Adjudication only ends
+    games the fox has already won, so it never changes who wins after a ply, and red means the same under both
+    settings. MoveGradingTests check this after every ply of every 6×6 position (both win conditions, adjudication
+    on and off) and every 7×7 Classic position.
+  - Hovering a square shows its plies with their values.
+- **Blunders** are marked "??" with the harness's definition, through the same function (D-64).
+- **Analyse** runs a fresh search of the shown position: lin-v0, its own 64 MB table cleared first, the best root
+  move, a 2 s hard limit. Stop keeps the deepest completed iteration. Moving to another position cancels the search
+  and drops its result. Each finished result stays with its position while the viewer is open.
+- **Play from here** starts a new game from the shown position, under the same rules, with the players now in the
+  cyclers. The cyclers stay usable in the viewer. The button is disabled on a finished position.
+- **Drawing (amends D-51).** The board is now drawn from a `BoardView` snapshot that the session builds, the same
+  for play and replay; the panel still reads the session.
+- **Play panel (amends D-49).** Its bottom row is now Save, Load and Replay. The Ctrl+S and Ctrl+O hints left the
+  labels to make room.
+- **Checklist item 9.** Its 57-ply game is the longest an 8×8 game can last (2 · 4 · 7 + 1). The Classic rules
+  cannot produce one: before the last hound steps onto the bottom row, the fox would have to stand on that row's one
+  free square to avoid counting as escaped, and that is the square the hound needs. The check therefore uses a
+  Gilith game (docs/benchmarks/M7-viewer.md).
+
+**D-64 Shared move grading, `fh analyse --solver`, and weight paths in records.**
+
+- **One grading function.** `MoveGrading`, in FoxHounds.Solver, holds the viewer's four classes and the 11.5 blunder
+  judgement. The harness's per-game metrics now call the same `Judge`, so the "??" markers and the games.jsonl
+  counts cannot drift apart. A rerun of an M6 experiment after the switch gave a byte-identical summary.
+- **`fh analyse --solver`** now also lists every legal ply with its value after the ply (counting the ply) and its
+  colour, for the hand check of item 10. `--rules classic|gilith` was added; the command had used the Classic win
+  condition only.
+- **Weight paths in records.** Records now store a player's weight file as an absolute path
+  (`AgentSpec.WithAbsolutePaths`). A record has no folder for a relative path to resolve against, so a recorded
+  player with its own weights could not be rebuilt, for example for Play from here. The app matches recorded players
+  to its presets in that form. Records written earlier keep their relative paths; replaying them is unaffected.
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |

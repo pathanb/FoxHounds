@@ -1,0 +1,196 @@
+{
+  "format": "fhg/1",
+  "appVersion": "m7-check",
+  "startedUtc": "2026-11-05T12:00:00Z",
+  "ruleSet": {
+    "boardSize": 8,
+    "foxStart": "fixed",
+    "firstMover": "fox",
+    "foxWinCondition": "houndsImmobile",
+    "adjudicateEscape": false
+  },
+  "start": "8/e1/b8,d8,f8,h8/F",
+  "players": {
+    "fox": {
+      "kind": "human"
+    },
+    "hounds": {
+      "kind": "human"
+    }
+  },
+  "plies": [
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "b8-a7"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "a7-b6"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "b6-a5"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "a5-b4"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "b4-a3"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "a3-b2"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "b2-a1"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "d8-c7"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "c7-d6"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "d6-c5"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "c5-d4"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "d4-c3"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "c3-d2"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "d2-c1"
+    },
+    {
+      "move": "e1-f2"
+    },
+    {
+      "move": "h8-g7"
+    },
+    {
+      "move": "f2-e3"
+    },
+    {
+      "move": "g7-h6"
+    },
+    {
+      "move": "e3-d4"
+    },
+    {
+      "move": "h6-g5"
+    },
+    {
+      "move": "d4-c5"
+    },
+    {
+      "move": "g5-h4"
+    },
+    {
+      "move": "c5-b6"
+    },
+    {
+      "move": "h4-g3"
+    },
+    {
+      "move": "b6-a7"
+    },
+    {
+      "move": "g3-h2"
+    },
+    {
+      "move": "a7-b8"
+    },
+    {
+      "move": "h2-g1"
+    },
+    {
+      "move": "b8-a7"
+    },
+    {
+      "move": "f8-e7"
+    },
+    {
+      "move": "a7-b8"
+    },
+    {
+      "move": "e7-f6"
+    },
+    {
+      "move": "b8-a7"
+    },
+    {
+      "move": "f6-e5"
+    },
+    {
+      "move": "a7-b8"
+    },
+    {
+      "move": "e5-f4"
+    },
+    {
+      "move": "b8-a7"
+    },
+    {
+      "move": "f4-e3"
+    },
+    {
+      "move": "a7-b8"
+    },
+    {
+      "move": "e3-f2"
+    },
+    {
+      "move": "b8-a7"
+    },
+    {
+      "move": "f2-e1"
+    },
+    {
+      "move": "a7-b8"
+    }
+  ],
+  "result": "foxWins",
+  "reason": "houndsImmobile"
+}

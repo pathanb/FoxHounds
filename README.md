@@ -13,7 +13,7 @@ exact solver that grades it, a reproducible simulation harness and an automatic 
 ```
 src/FoxHounds.Core      rules, state, moves, RNG, Zobrist, notation, game records, IAgent, GameRunner
 src/FoxHounds.Engine    evaluation features and evaluators, alpha-beta search, MinimaxAgent, RandomAgent
-src/FoxHounds.Solver    exact solver tables, SolverAgent
+src/FoxHounds.Solver    exact solver tables, SolverAgent, move grading
 src/FoxHounds.Agents    AgentFactory and agent specs (one factory for app, CLI and experiments)
 src/FoxHounds.Sim       match runner, opening sets, statistics, experiments
 src/FoxHounds.Tuning    regression and SPSA weight tuners
@@ -22,6 +22,7 @@ src/FoxHounds.App       the desktop app (Raylib-cs)
 tests/                  one xUnit v3 test project per library
 bench/                  BenchmarkDotNet suites
 reference/              Python reference prototype and its outputs
+tools/app-checks/       drives the app on a virtual display for the manual checks
 ```
 
 ## Build and test

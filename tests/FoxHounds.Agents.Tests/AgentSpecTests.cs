@@ -109,6 +109,14 @@ public sealed class AgentSpecTests
         var agent = Assert.IsType<MinimaxAgent>(Factory.Create(spec, new Rules(RuleSet.Classic), null, Ct));
         Assert.Equal("mine", agent.Evaluator.Name);
 
+        // A game record keeps the path absolute, so the player can be rebuilt from the record anywhere.
+        var recorded = AgentSpec.Parse(spec.WithAbsolutePaths().ToJson());
+        Assert.Equal(Path.Combine(dir, "w", "mine.json"), recorded.Evaluator!.WeightsFile);
+        Assert.Equal("mine", Assert.IsType<MinimaxAgent>(Factory.Create(recorded, new Rules(RuleSet.Classic), null, Ct)).Evaluator.Name);
+        Assert.Same(recorded, recorded.WithAbsolutePaths());
+        var builtIn = AgentSpec.Parse("""{ "type": "minimax", "name": "m" }""");
+        Assert.Same(builtIn, builtIn.WithAbsolutePaths());
+
         // A weight file for another board size is refused by the factory (spec 9.3).
         File.WriteAllText(Path.Combine(dir, "w", "mine.json"), """{ "name": "mine", "evaluator": "linear", "boardSize": 10, "weights": { "FoxToMove": 3 } }""");
         Assert.Throws<InvalidDataException>(() => Factory.Create(spec, new Rules(RuleSet.Classic), null, Ct));

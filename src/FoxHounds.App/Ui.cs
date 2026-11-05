@@ -106,6 +106,41 @@ internal sealed class Ui
         return "";
     }
 
+    /// <summary>
+    /// Breaks text at spaces into at most <paramref name="maxLines"/> lines that fit <paramref name="width"/> pixels;
+    /// when text is left over, the last line ends with "...".
+    /// </summary>
+    public static List<string> Wrap(string text, int width, int fontSize, int maxLines)
+    {
+        var lines = new List<string>();
+        string current = "";
+        foreach (string word in text.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            string candidate = current.Length == 0 ? word : current + " " + word;
+            if (Raylib.MeasureText(candidate, fontSize) <= width || current.Length == 0)
+            {
+                current = candidate;
+                continue;
+            }
+
+            if (lines.Count == maxLines - 1)
+            {
+                lines.Add(Fit(current + " ...", width, fontSize));
+                return lines;
+            }
+
+            lines.Add(current);
+            current = word;
+        }
+
+        if (current.Length > 0)
+        {
+            lines.Add(Fit(current, width, fontSize));
+        }
+
+        return lines;
+    }
+
     public static Rectangle ToRaylib(Rect r) => new(r.X, r.Y, r.W, r.H);
 
     private static void Triangle(Rect r, bool pointRight, Color color, bool hover)

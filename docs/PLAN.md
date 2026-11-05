@@ -13,8 +13,8 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | done (483fc43, after review fixes) |
 | M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | done (be7f77c) |
 | M5 Simulation harness | openings and suites, experiment modes, statistics, `fh openings/suite/match/grade/report`; T-ENG-05, T-SIM-01…03; 8.9 baseline | done (13827e2; targets await Q-08) |
-| M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02; one candidate through 12.4 | done (see log; promotion decision awaits Q-09) |
-| M7 Replay and analysis | viewer, solver colouring, analyse, play from here | not started |
+| M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02; one candidate through 12.4 | done (29bb84e; promotion decision awaits Q-09) |
+| M7 Replay and analysis | viewer, solver colouring, analyse, play from here; manual checklist items 9–12 | done (see log) |
 | M8 Hardening | n = 10 solver, self-contained builds, user guide | not started |
 
 A milestone is done when its tests from spec 15.1 pass, its numbers match the reference prototype, the
@@ -65,11 +65,15 @@ The desktop app can be run headless for screenshots; the options are listed in `
 ```bash
 xvfb-run -a -s "-screen 0 1700x1100x24" src/FoxHounds.App/bin/Release/net10.0/FoxHounds --data /tmp/fh \
     --screenshot /tmp/shot.png --n 8 --moves "e1-d2 b8-c7" --select d2      # or --fox Hard --hounds Hard --frames 600
+xvfb-run -a -s "-screen 0 1700x1100x24" src/FoxHounds.App/bin/Release/net10.0/FoxHounds --data /tmp/fh \
+    --screenshot /tmp/replay.png --replay game.fhg --cursor 10 --hover d6 --analyse
+fh analyse -p "8/e1/b4,d4,f4,e3/H" --solver        # every legal ply with the solver's value and the viewer's colour
 ```
 
 ## Manual checks (spec 16.1)
 
-What could be checked without a screen was checked headlessly; the owner's hands-on pass is still to do.
+What could be checked without a screen was checked headlessly; the owner's hands-on pass is still to do. Items 9–12
+also used real key presses and clicks on a virtual display: `tools/app-checks/session.sh` (Xvfb, python-xlib).
 
 | Item | Checked so far |
 |------|----------------|
@@ -81,6 +85,10 @@ What could be checked without a screen was checked headlessly; the owner's hands
 | 6. Save, quit, relaunch, load | headless save then `--load` relaunch, and T-APP-01 |
 | 7. AI vs AI at every delay; Pause stops after the current ply | T-APP-01 with the manual clock |
 | 8. Resize mid-game | layout tests at 25 window and board sizes; not yet by hand |
+| 9. Replay through a 57-ply game | real key presses on a 57-ply record, and a unit test over all 58 positions (docs/benchmarks/M7-viewer.md) |
+| 10. Solver colouring against `fh analyse` | three positions compared by hand, screenshots in docs/benchmarks/M7 |
+| 11. Blunder markers against games.jsonl | a gauntlet record with 2 + 2 blunders; each marker confirmed red by `fh analyse` |
+| 12. Play from here with the selected players | real clicks, and a unit test |
 
 ## Log
 
@@ -118,3 +126,9 @@ What could be checked without a screen was checked headlessly; the owner's hands
   well but play no better than lin-v0. The SPSA candidate lin-s1-n8 was taken through 12.4: it passed the gauntlet
   (SPRT H1) and competence, but missed the test-set grade criterion by 0.03 pp of interval overlap, so it is not
   promoted (D-62). Open for the owner: Q-09.
+- 2026-11-06: M7 done. The replay and analysis viewer (D-63): stepping, solver colours with a tooltip, "??" blunder
+  markers from the harness's own judgement (D-64), the stored agent info of each ply, a 2 s Analyse in the
+  background, and Play from here. Manual checks 9–12 pass headlessly, with real key presses and clicks on a virtual
+  display (docs/benchmarks/M7-viewer.md). The 57-ply game of item 9 needs the Gilith rules: under Classic no game
+  can last that long. Found on the way: records stored relative weight paths, so a recorded player with its own
+  weights could not be rebuilt; records now keep absolute paths.

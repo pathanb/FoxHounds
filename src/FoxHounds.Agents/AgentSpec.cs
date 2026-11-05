@@ -89,6 +89,15 @@ public sealed record AgentSpec
     /// <summary>The budget this spec asks for; no fields means unlimited.</summary>
     public SearchBudget ToBudget() => Budget?.ToBudget() ?? SearchBudget.Unlimited;
 
+    /// <summary>
+    /// The spec with its weight file as an absolute path, for game records: a record has no folder of its own for a
+    /// relative path to resolve against (spec 14.1, 14.2), so without this a recorded player could not be rebuilt.
+    /// </summary>
+    public AgentSpec WithAbsolutePaths() =>
+        Evaluator?.WeightsFile is { } file && !Path.IsPathRooted(file)
+            ? this with { Evaluator = Evaluator with { WeightsFile = Path.GetFullPath(Resolve(file)) } }
+            : this;
+
     /// <summary>Resolves a path from the spec against <see cref="BaseDirectory"/>.</summary>
     public string Resolve(string path) =>
         Path.IsPathRooted(path) || string.IsNullOrEmpty(BaseDirectory) ? path : Path.Combine(BaseDirectory, path);

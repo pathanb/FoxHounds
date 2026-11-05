@@ -1,0 +1,1 @@
+{"game":324,"opening":162,"fox":"lin-s1-n8-1000","hounds":"lin-v0-1000","foxRole":"a","houndsRole":"b","result":"foxWins","reason":"foxEscaped","plies":27,"openingLabel":"F31","blunders":{"fox":2,"hounds":2},"wonPlies":{"fox":14,"hounds":2},"moves":{"fox":14,"hounds":13},"nodes":{"fox":10576,"hounds":10595},"ms":3}

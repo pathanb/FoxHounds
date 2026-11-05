@@ -365,8 +365,8 @@ public static class ExperimentRunner
                 HoundsBudget = e.BudgetFor(Side.Hounds, hounds.Spec),
                 Start = opening.Position,
                 Clock = clock,
-                FoxPlayer = PlayerInfo.ForAgent(foxAgent, fox.Spec.ToJson()),
-                HoundsPlayer = PlayerInfo.ForAgent(houndsAgent, hounds.Spec.ToJson()),
+                FoxPlayer = PlayerInfo.ForAgent(foxAgent, fox.Spec.WithAbsolutePaths().ToJson()),
+                HoundsPlayer = PlayerInfo.ForAgent(houndsAgent, hounds.Spec.WithAbsolutePaths().ToJson()),
             };
             var before = clock.Elapsed;
             var record = GameRunner.Play(state.Rules, foxAgent, houndsAgent, options, Rng.ForGame(e.Seed, item.Index), ct);

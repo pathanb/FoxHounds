@@ -19,15 +19,16 @@ internal sealed record PlayerOption(string Label, AgentSpec? Spec = null, Func<I
     public bool NeedsSolver => Spec?.Type == AgentFactory.Solver || Spec?.Evaluator?.Type == SolverEvaluator.TypeName;
 }
 
-/// <summary>One line of the move list: the move number, the fox's ply and the hounds' ply (either may be empty).</summary>
-internal readonly record struct MoveRow(int Number, string Fox, string Hounds);
+/// <summary>One line of the move list: the move number, the fox's ply and the hounds' ply (either may be empty), with
+/// the index of each ply in the game (−1 for an empty cell).</summary>
+internal readonly record struct MoveRow(int Number, string Fox, string Hounds, int FoxPly = -1, int HoundsPly = -1);
 
 /// <summary>
 /// The app's game logic without any Raylib (spec 13.1): rules, history, player slots, undo/redo, the running AI
 /// task, save and load. Called only from the UI thread; AI turns run on the thread pool and are collected in
 /// <see cref="Update"/>, which never blocks (spec 7.4).
 /// </summary>
-internal sealed class GameSession : IDisposable
+internal sealed partial class GameSession : IDisposable
 {
     /// <summary>Delays between AI plies offered by the delay cycler (spec 13.4).</summary>
     public static readonly int[] DelayChoicesMs = [0, 250, 500, 1000, 2000];
@@ -86,7 +87,7 @@ internal sealed class GameSession : IDisposable
 
     public bool IsOver => Outcome.IsOver;
 
-    public bool CanRedo => _redo.Count > 0;
+    public bool CanRedo => !InReplay && _redo.Count > 0;
 
     /// <summary>Square of the selected piece, if any.</summary>
     public byte? Selected { get; private set; }
@@ -128,7 +129,7 @@ internal sealed class GameSession : IDisposable
     public Func<AgentSpec, PlayerOption?>? ResolvePlayer { get; set; }
 
     /// <summary>True when <see cref="Undo"/> would change the game.</summary>
-    public bool CanUndo => UndoTarget() >= 0;
+    public bool CanUndo => !InReplay && UndoTarget() >= 0;
 
     public bool AiThinking => _aiTask is { IsCompleted: false };
 
@@ -157,6 +158,7 @@ internal sealed class GameSession : IDisposable
     /// <summary>Starts a new game; cancels any AI search first.</summary>
     public void NewGame(RuleSet ruleSet)
     {
+        ExitReplay();
         CancelAi();
         Rules = new Rules(ruleSet);
         Seed = unchecked((ulong)_clock.UtcNow.Ticks);
@@ -168,6 +170,7 @@ internal sealed class GameSession : IDisposable
     /// <summary>Starts a new game from a given position (Play from here, spec 13.5).</summary>
     public void NewGameFrom(GameState start)
     {
+        ExitReplay();
         CancelAi();
         Rules.Validate(start);
         Seed = unchecked((ulong)_clock.UtcNow.Ticks);
@@ -206,7 +209,8 @@ internal sealed class GameSession : IDisposable
             Collect(done);
         }
 
-        if (IsOver || AiThinking)
+        CollectAnalysis();
+        if (InReplay || IsOver || AiThinking)
         {
             return;
         }
@@ -240,7 +244,7 @@ internal sealed class GameSession : IDisposable
     public void ClickSquare(int square)
     {
         ClearMessage();
-        if (IsOver || AiThinking || square < 0 || square >= Rules.Geo.SquareCount)
+        if (InReplay || IsOver || AiThinking || square < 0 || square >= Rules.Geo.SquareCount)
         {
             return;
         }
@@ -318,7 +322,7 @@ internal sealed class GameSession : IDisposable
     {
         ClearMessage();
         int keep = UndoTarget();
-        if (keep < 0)
+        if (InReplay || keep < 0)
         {
             return false;
         }
@@ -337,7 +341,7 @@ internal sealed class GameSession : IDisposable
     public bool Redo()
     {
         ClearMessage();
-        if (_redo.Count == 0)
+        if (InReplay || _redo.Count == 0)
         {
             return false;
         }
@@ -361,6 +365,11 @@ internal sealed class GameSession : IDisposable
         if (Message is not null)
         {
             return Message;
+        }
+
+        if (InReplay)
+        {
+            return ReplayStatus();
         }
 
         if (IsOver)
@@ -441,14 +450,14 @@ internal sealed class GameSession : IDisposable
         Side first = _start?.SideToMove ?? Rules.Config.FirstMover;
         if (first == Side.Hounds && _plies.Count > 0)
         {
-            rows.Add(new MoveRow(1, "...", geo.FormatMove(_plies[0].Move)));
+            rows.Add(new MoveRow(1, "...", geo.FormatMove(_plies[0].Move), -1, 0));
             i = 1;
         }
 
         for (; i < _plies.Count; i += 2)
         {
-            string hounds = i + 1 < _plies.Count ? geo.FormatMove(_plies[i + 1].Move) : "";
-            rows.Add(new MoveRow(rows.Count + 1, geo.FormatMove(_plies[i].Move), hounds));
+            bool hounds = i + 1 < _plies.Count;
+            rows.Add(new MoveRow(rows.Count + 1, geo.FormatMove(_plies[i].Move), hounds ? geo.FormatMove(_plies[i + 1].Move) : "", i, hounds ? i + 1 : -1));
         }
 
         return rows;
@@ -512,6 +521,7 @@ internal sealed class GameSession : IDisposable
             return false;
         }
 
+        ExitReplay();
         CancelAi();
         Rules = new Rules(record.RuleSet);
         Seed = record.Seed ?? unchecked((ulong)_clock.UtcNow.Ticks);
@@ -552,6 +562,8 @@ internal sealed class GameSession : IDisposable
 
     public void Dispose()
     {
+        CancelAnalysis();
+        _analysisCts?.Dispose();
         CancelAi();
         _aiCts?.Dispose();
         _tableCts?.Cancel();
@@ -868,7 +880,7 @@ internal sealed class GameSession : IDisposable
             return PlayerInfo.Human;
         }
 
-        return new PlayerInfo(PlayerInfo.AgentKind, option.Spec?.Name ?? option.Label, option.Spec?.ToJson());
+        return new PlayerInfo(PlayerInfo.AgentKind, option.Spec?.Name ?? option.Label, option.Spec?.WithAbsolutePaths().ToJson());
     }
 
     private PlayerOption FromRecord(PlayerInfo info)

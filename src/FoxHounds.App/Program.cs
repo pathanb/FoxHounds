@@ -27,9 +27,13 @@ internal static class Program
 
         using var session = new GameSession(factory, SystemClock.Instance, Path.Combine(dataDir, "games"));
         var app = new AppController(session, players);
-        if (options.Load is not null && !session.Load(options.Load))
+        if ((options.Replay ?? options.Load) is { } path && !session.Load(path))
         {
             Console.Error.WriteLine(session.Message);
+        }
+        else if (options.Replay is not null)
+        {
+            app.EnterReplay();
         }
 
         if (options.Screenshot is not null)
@@ -81,7 +85,7 @@ internal static class Program
     /// <summary>Headless check mode: set up a position, render a few frames, write a PNG, exit.</summary>
     private static int Screenshot(AppController app, GameSession session, List<PlayerOption> players, Options o)
     {
-        if (o.Load is null)
+        if (o.Load is null && o.Replay is null)
         {
             var ruleSet = (o.Gilith ? RuleSet.Gilith : RuleSet.Classic) with
             {
@@ -110,6 +114,42 @@ internal static class Program
         if (o.Select is { } select && geo.TryParseSquare(select, out int sq))
         {
             session.ClickSquare(sq);
+        }
+
+        // The solver table loads in the background; the viewer's colours need it.
+        var waitUntil = SystemClock.Instance.Elapsed + TimeSpan.FromSeconds(60);
+        while (session.TableProgress is not null && SystemClock.Instance.Elapsed < waitUntil)
+        {
+            app.Frame();
+        }
+
+        if (o.EnterReplay)
+        {
+            app.EnterReplay();
+        }
+
+        if (o.Cursor is int cursor)
+        {
+            session.ReplayTo(cursor);
+        }
+
+        if (o.Hover is { } hover && geo.TryParseSquare(hover, out int hoverSquare))
+        {
+            app.HoverOverride = hoverSquare;
+        }
+
+        if (o.Analyse)
+        {
+            session.Analyse();
+            while (session.Analysing)
+            {
+                app.Frame();
+            }
+        }
+
+        if (o.PlayFromHere)
+        {
+            session.PlayFromHere();
         }
 
         if (o.Save)
@@ -145,15 +185,29 @@ internal static class Program
 
     /// <summary>
     /// Command line: <c>--data DIR</c> keeps tables, games and custom agents in DIR instead of the user data folder;
-    /// <c>--size WxH</c> sets the window size; <c>--load FILE</c> opens a saved game. The rest drive the headless screenshot mode used to check the drawing:
+    /// <c>--size WxH</c> sets the window size; <c>--load FILE</c> opens a saved game; <c>--replay FILE</c> opens one in
+    /// the replay viewer. The rest drive the headless screenshot mode used to check the drawing:
     /// <c>--screenshot PNG</c> with <c>--n</c>, <c>--gilith</c>, <c>--choose-start</c>, <c>--fox</c>/<c>--hounds</c>
-    /// (a player label), <c>--moves "e1-d2 b8-c7"</c>, <c>--select SQUARE</c>, <c>--save</c>, <c>--load-dialog</c>
-    /// and <c>--frames</c>.
+    /// (a player label), <c>--moves "e1-d2 b8-c7"</c>, <c>--select SQUARE</c>, <c>--enter-replay</c>,
+    /// <c>--cursor PLIES</c>, <c>--hover SQUARE</c>, <c>--analyse</c>, <c>--play-from-here</c>, <c>--save</c>,
+    /// <c>--load-dialog</c> and <c>--frames</c>.
     /// </summary>
     private sealed record Options(int Width, int Height, string? DataDirectory, string? Load, string? Screenshot, int N, string Fox,
         string Hounds, IReadOnlyList<string> Moves, string? Select, bool ChooseStart, bool Gilith, bool Save,
         bool LoadDialog, int Frames)
     {
+        public string? Replay { get; init; }
+
+        public bool EnterReplay { get; init; }
+
+        public int? Cursor { get; init; }
+
+        public string? Hover { get; init; }
+
+        public bool Analyse { get; init; }
+
+        public bool PlayFromHere { get; init; }
+
         public static Options Parse(string[] args)
         {
             string Get(string name, string fallback)
@@ -179,7 +233,15 @@ internal static class Program
                 args.Contains("--gilith"),
                 args.Contains("--save"),
                 args.Contains("--load-dialog"),
-                int.Parse(Get("--frames", "3"), CultureInfo.InvariantCulture));
+                int.Parse(Get("--frames", "3"), CultureInfo.InvariantCulture))
+            {
+                Replay = args.Contains("--replay") ? Path.GetFullPath(Get("--replay", "")) : null,
+                EnterReplay = args.Contains("--enter-replay"),
+                Cursor = args.Contains("--cursor") ? int.Parse(Get("--cursor", "0"), CultureInfo.InvariantCulture) : null,
+                Hover = args.Contains("--hover") ? Get("--hover", "") : null,
+                Analyse = args.Contains("--analyse"),
+                PlayFromHere = args.Contains("--play-from-here"),
+            };
         }
     }
 }

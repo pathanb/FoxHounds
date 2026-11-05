@@ -24,20 +24,13 @@ internal static class GameMetrics
             var mover = s.SideToMove;
             nodes[(int)mover] += ply.Info?.Nodes ?? 0;
             moves[(int)mover]++;
-            var next = rules.Apply(s, ply.Move);
-            if (table is not null && table.Get(s).SideToMoveWins)
+            if (table is not null && MoveGrading.Judge(rules, table, s, ply.Move) is { MoverWasWinning: true } verdict)
             {
-                // A blunder turns a position won for the mover into one won for the opponent.
                 won[(int)mover]++;
-                var outcome = rules.Evaluate(next);
-                bool stillWon = outcome.IsOver ? outcome.Winner == mover : table.Get(next).Winner(next.SideToMove) == mover;
-                if (!stillWon)
-                {
-                    blunders[(int)mover]++;
-                }
+                blunders[(int)mover] += verdict.Blunder ? 1 : 0;
             }
 
-            s = next;
+            s = rules.Apply(s, ply.Move);
         }
 
         return new GameLineJson

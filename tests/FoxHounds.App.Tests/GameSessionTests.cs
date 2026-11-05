@@ -340,12 +340,12 @@ public sealed class GameSessionTests
         Click(s, "e1-d2");
         Click(s, "b8-c7");
         Click(s, "d2-e3");
-        Assert.Equal(new[] { new MoveRow(1, "e1-d2", "b8-c7"), new MoveRow(2, "d2-e3", "") }, s.MoveRows());
+        Assert.Equal(new[] { new MoveRow(1, "e1-d2", "b8-c7", 0, 1), new MoveRow(2, "d2-e3", "", 2) }, s.MoveRows());
 
         s.NewGameFrom(s.Rules.FromNotation("8/e3/c7,d8,f8,h8/H"));
         Click(s, "c7-b6");
         Click(s, "e3-d4");
-        Assert.Equal(new[] { new MoveRow(1, "...", "c7-b6"), new MoveRow(2, "e3-d4", "") }, s.MoveRows());
+        Assert.Equal(new[] { new MoveRow(1, "...", "c7-b6", -1, 0), new MoveRow(2, "e3-d4", "", 1) }, s.MoveRows());
     }
 
     [Fact]
