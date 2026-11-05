@@ -1,0 +1,19 @@
+{
+  "format": "weights/1",
+  "name": "lin-v0",
+  "evaluator": "linear",
+  "weights": {
+    "FoxAdvance": 8,
+    "FoxMobility": 12,
+    "HoundMobility": -4,
+    "FoxRegion": 3,
+    "GoalReachable": 250,
+    "GoalCloseness": 25,
+    "HoundsPassed": 80,
+    "HoundSpread": 15,
+    "HoundMovesLeft": -2,
+    "EscapeDistance": -10,
+    "FoxToMove": 5
+  },
+  "provenance": "hand-set starting point, not tuned"
+}

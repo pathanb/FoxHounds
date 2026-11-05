@@ -163,6 +163,26 @@ and a zero node limit (use null for "no limit"). `GameRecord.Replay` requires ru
 **D-35 GameState.GetHashCode folds the Zobrist hash.** Equal states have equal hashes (5.2), and unlike
 `HashCode.Combine` the value is the same in every process, so hash sets of positions iterate reproducibly.
 
+Decisions taken while building M3 (2026-11-05):
+
+**D-36 Weight-file format tag (completes 9.3 and 14).** Weight files are written with `"format": "weights/1"`;
+files without a format field, like the example in 9.3, are read as weights/1. Feature names match exactly and
+case-sensitively.
+
+**D-37 Search stage C is built in M3 (amends the 8 stage table).** Node and time budgets, abort handling and both
+root-selection modes ship with stages A and B, because the M4 presets need node budgets, a hard time cap and
+cancellation. T-ENG-06 (cancellation and allocation) is tested in M3; T-ENG-05 (golden determinism file) stays
+with M5.
+
+**D-38 MinimaxAgent's fox start (completes 7.1).** Under ChooseOnBackRow the agent searches each start position
+with `SearchOptions.FoxStartBudget` (default depth 8) and takes the best score for the fox; ties go to the first
+square.
+
+**D-39 Proven results stop iterative deepening only when they fit (refines 8.6).** The search stops early on a
+proven root score only when its distance is at most the depth just completed. A proof grafted from a deeper
+transposition can be longer than the current depth and might not be the shortest; deepening on until the proof fits
+guarantees the exact shortest-win and longest-loss distances (T-ENG-03 and T-ENG-04).
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |
@@ -185,6 +205,7 @@ and a zero node limit (use null for "no limit"). `GameRecord.Replay` requires ru
 | M2 | solver build time, n = 8 | 149 ms single-threaded (floor: 10 s); BenchmarkDotNet ShortRun, docs/benchmarks/M2-solver.md |
 | M2 | solver build time and result, n = 10 (published: hounds win in 72) | 9–10 s on 2 threads, 212 MB. Gilith: hounds win in 72 from every start (matches the published solve); Classic: hounds win in 72 (fox first) / 71 (hounds first) |
 | M2 | other sizes (2 threads, Release) | n = 9: 0.6 s; Classic fox wins in 27 / 40, Gilith fox wins in 65 / 64. n = 11: 31–63 s, 655 MB; Classic fox wins in 51 / 48, Gilith fox wins in 101 / 100 (fox first / hounds first). Under HoundsImmobile every odd board is a fox win in exactly MaxPlies |
-| M3 | search nodes per second at fixed depth | _pending_ |
+| M3 | search nodes per second at fixed depth | 10.9 M nodes/s: depth 10 on the 20 benchmark positions, 1 MB table, 9.31 ms per pass (docs/benchmarks/M3-search.md). A 15.7M-node search from the 8×8 start proves "hounds win in 44" in 2.2–2.5 s (6.4–7.0 M nodes/s) |
+| M3 | evaluation cost (spec 9.4) | 50 ns per lin-v0 evaluation, 36 ns of it the flood fill (64-bit path for n ≤ 11; 86 ns before). Leaves are 35% of nodes, so evaluation is about 19% of search time in the benchmark profile: the SHOULD target of 10% is not met. A shift-based flood fill measured slower (80 ns); an evaluation cache is the next candidate, to try with the M5 harness |
 | M5 | competence baseline for lin-v0 and the agreed 8.9 targets | _pending_ |
 | M6 | promoted weight files and their experiment ids | _pending_ |

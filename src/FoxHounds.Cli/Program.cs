@@ -10,6 +10,7 @@ internal static class Program
         {
             PerftCommand.Create(),
             SolveCommand.Create(),
+            AnalyseCommand.Create(),
         };
 
         try
