@@ -1,0 +1,53 @@
+{
+  "format": "tuning-report/1",
+  "id": "m6-regression-tapered-n8",
+  "tuner": "regression",
+  "evaluator": "tapered",
+  "trainPositions": 34370,
+  "validationPositions": 6872,
+  "regression": {
+    "steps": 6826,
+    "bestStep": 6326,
+    "intercept": -2.511538427223001,
+    "trainLoss": 0.33230334900390723,
+    "validationLoss": 0.3335835440026875,
+    "trainAccuracy": 0.8470468431771894,
+    "validationAccuracy": 0.8482246798603027,
+    "validationLossWithoutIntercept": 0.6431757567485549,
+    "lambda": 0.0001,
+    "learningRate": 0.01
+  },
+  "weights": {
+    "format": "weights/1",
+    "name": "tap-r1-n8",
+    "evaluator": "tapered",
+    "boardSize": 8,
+    "early": {
+      "FoxAdvance": -561,
+      "FoxMobility": 251,
+      "HoundMobility": -466,
+      "FoxRegion": -57,
+      "GoalReachable": 473,
+      "GoalCloseness": 246,
+      "HoundsPassed": 201,
+      "HoundSpread": 821,
+      "HoundMovesLeft": 182,
+      "EscapeDistance": -382,
+      "FoxToMove": 383
+    },
+    "late": {
+      "FoxAdvance": 389,
+      "FoxMobility": 252,
+      "HoundMobility": 279,
+      "FoxRegion": 53,
+      "GoalReachable": 605,
+      "GoalCloseness": 555,
+      "HoundsPassed": 182,
+      "HoundSpread": -455,
+      "HoundMovesLeft": -257,
+      "EscapeDistance": -18,
+      "FoxToMove": 788
+    },
+    "provenance": "m6-regression-tapered-n8"
+  }
+}

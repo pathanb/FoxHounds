@@ -1,0 +1,148 @@
+{
+  "format": "summary/1",
+  "id": "m6-promotion-gauntlet-lin-s1-vs-lin-v0-1000",
+  "mode": "headToHead",
+  "sha256": "446b3df492213caaf6c91373b352f7076dead92cc19a1d23b16bdc3231006d09",
+  "planned": 4000,
+  "done": 1060,
+  "complete": true,
+  "agents": {
+    "a": {
+      "name": "lin-s1-n8-1000",
+      "fox": {
+        "games": 530,
+        "wins": {
+          "successes": 397,
+          "trials": 530,
+          "rate": 0.749057,
+          "low": 0.710442,
+          "high": 0.784087
+        },
+        "conversion": {
+          "successes": 263,
+          "trials": 265,
+          "rate": 0.992453,
+          "low": 0.972904,
+          "high": 0.997928
+        },
+        "blunders": {
+          "successes": 4,
+          "trials": 2242,
+          "rate": 0.001784,
+          "low": 0.000694,
+          "high": 0.004579
+        },
+        "moves": 4886,
+        "nodes": 3211477,
+        "nodesPerMove": 657.281416,
+        "forfeits": 0
+      },
+      "hounds": {
+        "games": 530,
+        "wins": {
+          "successes": 150,
+          "trials": 530,
+          "rate": 0.283019,
+          "low": 0.246335,
+          "high": 0.322825
+        },
+        "conversion": {
+          "successes": 148,
+          "trials": 265,
+          "rate": 0.558491,
+          "low": 0.49829,
+          "high": 0.61702
+        },
+        "blunders": {
+          "successes": 119,
+          "trials": 3059,
+          "rate": 0.038902,
+          "low": 0.032608,
+          "high": 0.046352
+        },
+        "moves": 4873,
+        "nodes": 3511807,
+        "nodesPerMove": 720.666325,
+        "forfeits": 0
+      }
+    },
+    "b": {
+      "name": "lin-v0-1000",
+      "fox": {
+        "games": 530,
+        "wins": {
+          "successes": 380,
+          "trials": 530,
+          "rate": 0.716981,
+          "low": 0.677175,
+          "high": 0.753665
+        },
+        "conversion": {
+          "successes": 263,
+          "trials": 265,
+          "rate": 0.992453,
+          "low": 0.972904,
+          "high": 0.997928
+        },
+        "blunders": {
+          "successes": 4,
+          "trials": 2111,
+          "rate": 0.001895,
+          "low": 0.000737,
+          "high": 0.004862
+        },
+        "moves": 5019,
+        "nodes": 3349350,
+        "nodesPerMove": 667.33413,
+        "forfeits": 0
+      },
+      "hounds": {
+        "games": 530,
+        "wins": {
+          "successes": 133,
+          "trials": 530,
+          "rate": 0.250943,
+          "low": 0.215913,
+          "high": 0.289558
+        },
+        "conversion": {
+          "successes": 131,
+          "trials": 265,
+          "rate": 0.49434,
+          "low": 0.434655,
+          "high": 0.554186
+        },
+        "blunders": {
+          "successes": 136,
+          "trials": 2795,
+          "rate": 0.048658,
+          "low": 0.041283,
+          "high": 0.057273
+        },
+        "moves": 4723,
+        "nodes": 3382868,
+        "nodesPerMove": 716.254076,
+        "forfeits": 0
+      }
+    }
+  },
+  "headToHead": [
+    {
+      "a": "a",
+      "b": "b",
+      "pairs": 530,
+      "score": 0.516038,
+      "scoreLow": 0.503154,
+      "scoreHigh": 0.528921,
+      "elo": 11.147984,
+      "eloLow": 2.191931,
+      "eloHigh": 20.118876,
+      "sprt": {
+        "llr": 2.945012,
+        "lower": -2.944439,
+        "upper": 2.944439,
+        "decision": "acceptH1"
+      }
+    }
+  ]
+}

@@ -12,8 +12,8 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | done (dbae502, after review fixes) |
 | M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | done (483fc43, after review fixes) |
 | M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | done (be7f77c) |
-| M5 Simulation harness | openings and suites, experiment modes, statistics, `fh openings/suite/match/grade/report`; T-ENG-05, T-SIM-01…03; 8.9 baseline | done (see log; targets await Q-08) |
-| M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02 | not started |
+| M5 Simulation harness | openings and suites, experiment modes, statistics, `fh openings/suite/match/grade/report`; T-ENG-05, T-SIM-01…03; 8.9 baseline | done (13827e2; targets await Q-08) |
+| M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02; one candidate through 12.4 | done (see log; promotion decision awaits Q-09) |
 | M7 Replay and analysis | viewer, solver colouring, analyse, play from here | not started |
 | M8 Hardening | n = 10 solver, self-contained builds, user guide | not started |
 
@@ -45,6 +45,7 @@ fh suite --n 8 --seed 11 --max-games 10000000 --out-dir experiments/suites/n8   
 fh match experiments/m5-hounds-conversion.json --out runs/m5-hounds        # rerun the same command to resume
 fh grade experiments/m5-grade-lin-v0.json --out runs/m5-grade
 fh report runs/m5-hounds [runs/other]
+fh tune experiments/tuning/m6-spsa-lin.json --out runs/m6-spsa-lin        # also regression specs there
 python3 reference/fh_proto.py all               # reference tables, about 4 minutes
 ```
 
@@ -112,3 +113,8 @@ What could be checked without a screen was checked headlessly; the owner's hands
   (D-60, docs/benchmarks/M5-competence.md) meets every 8.9 target at 2,000,000 nodes, with no error; mistakes appear
   below about 100,000 nodes. The D-28 suite came out at 34,370 / 6,872 / 13,757 positions, since some strata are
   rare. Open for the owner: Q-08, which targets to keep.
+- 2026-11-05: M6 done. Regression (D-17) and SPSA (D-16) tuners with `fh tune` (D-61); T-TUNE-01 (fast and slow
+  forms) and T-TUNE-02 pass, and a rerun of the SPSA run is byte-identical. The regression fits predict the winner
+  well but play no better than lin-v0. The SPSA candidate lin-s1-n8 was taken through 12.4: it passed the gauntlet
+  (SPRT H1) and competence, but missed the test-set grade criterion by 0.03 pp of interval overlap, so it is not
+  promoted (D-62). Open for the owner: Q-09.

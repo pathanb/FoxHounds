@@ -1,0 +1,70 @@
+{
+  "format": "summary/1",
+  "id": "m6-fox-tap-r1-n8-1000",
+  "mode": "vsReference",
+  "sha256": "ced2cdc39a1c3d29fa601d13f4bb53d8f9006122473d9e113c6bb1af63bd68f2",
+  "planned": 1000,
+  "done": 1000,
+  "complete": true,
+  "agents": {
+    "candidate": {
+      "name": "tap-r1-n8-1000",
+      "fox": {
+        "games": 1000,
+        "wins": {
+          "successes": 979,
+          "trials": 1000,
+          "rate": 0.979,
+          "low": 0.968109,
+          "high": 0.986224
+        },
+        "conversion": {
+          "successes": 979,
+          "trials": 1000,
+          "rate": 0.979,
+          "low": 0.968109,
+          "high": 0.986224
+        },
+        "blunders": {
+          "successes": 21,
+          "trials": 4800,
+          "rate": 0.004375,
+          "low": 0.002863,
+          "high": 0.006679
+        },
+        "moves": 5038,
+        "nodes": 2303023,
+        "nodesPerMove": 457.130409,
+        "forfeits": 0
+      }
+    },
+    "reference": {
+      "name": "solver",
+      "hounds": {
+        "games": 1000,
+        "wins": {
+          "successes": 21,
+          "trials": 1000,
+          "rate": 0.021,
+          "low": 0.013776,
+          "high": 0.031891
+        },
+        "blunders": {
+          "successes": 0,
+          "trials": 259,
+          "rate": 0,
+          "low": 0,
+          "high": 0.014616
+        },
+        "moves": 4560,
+        "nodes": 0,
+        "nodesPerMove": 0,
+        "forfeits": 0
+      }
+    }
+  },
+  "openings": {
+    "foxWon": 1000,
+    "houndsWon": 0
+  }
+}

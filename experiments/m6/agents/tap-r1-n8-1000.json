@@ -1,0 +1,1 @@
+{ "format": "agent/1", "type": "minimax", "name": "tap-r1-n8-1000", "evaluator": { "type": "tapered", "weightsFile": "../weights/tap-r1-n8.json" }, "budget": { "maxNodes": 1000 } }

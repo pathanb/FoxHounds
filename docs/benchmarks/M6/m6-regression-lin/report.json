@@ -1,0 +1,40 @@
+{
+  "format": "tuning-report/1",
+  "id": "m6-regression-lin-n8",
+  "tuner": "regression",
+  "evaluator": "linear",
+  "trainPositions": 34370,
+  "validationPositions": 6872,
+  "regression": {
+    "steps": 3818,
+    "bestStep": 3318,
+    "intercept": -2.9374766254979243,
+    "trainLoss": 0.3546087855691351,
+    "validationLoss": 0.35194953229497405,
+    "trainAccuracy": 0.832819319173698,
+    "validationAccuracy": 0.8327997671711292,
+    "validationLossWithoutIntercept": 0.7859347961105694,
+    "lambda": 0.0001,
+    "learningRate": 0.01
+  },
+  "weights": {
+    "format": "weights/1",
+    "name": "lin-r1-n8",
+    "evaluator": "linear",
+    "boardSize": 8,
+    "weights": {
+      "FoxAdvance": -562,
+      "FoxMobility": 230,
+      "HoundMobility": -203,
+      "FoxRegion": 6,
+      "GoalReachable": 943,
+      "GoalCloseness": 375,
+      "HoundsPassed": 333,
+      "HoundSpread": 414,
+      "HoundMovesLeft": 63,
+      "EscapeDistance": -460,
+      "FoxToMove": 487
+    },
+    "provenance": "m6-regression-lin-n8"
+  }
+}

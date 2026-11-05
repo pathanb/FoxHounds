@@ -1,0 +1,1 @@
+{ "format": "agent/1", "type": "minimax", "name": "lin-r1-n8-5000", "evaluator": { "type": "linear", "weightsFile": "../weights/lin-r1-n8.json" }, "budget": { "maxNodes": 5000 } }

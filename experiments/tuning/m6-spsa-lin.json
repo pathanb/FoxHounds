@@ -1,0 +1,19 @@
+{
+  "format": "tuning/1",
+  "id": "m6-spsa-lin-n8-1k",
+  "seed": 20261110,
+  "ruleSet": "classic",
+  "boardSize": 8,
+  "tuner": "spsa",
+  "evaluator": "linear",
+  "name": "lin-s1-n8",
+  "train": "../suites/n8/train.txt",
+  "validation": "../suites/n8/validation.txt",
+  "spsa": {
+    "iterations": 500,
+    "objective": "gradeAccuracy",
+    "batch": 2000,
+    "budget": { "maxNodes": 1000 },
+    "workers": 2
+  }
+}

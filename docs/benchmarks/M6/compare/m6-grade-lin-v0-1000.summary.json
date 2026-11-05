@@ -1,0 +1,68 @@
+{
+  "format": "summary/1",
+  "id": "m6-grade-lin-v0-1000",
+  "mode": "grade",
+  "sha256": "5ff4f74ce7eec0a737bc134ae2c4c0c61722361371df2ae2a76129165d174044",
+  "planned": 6872,
+  "done": 6872,
+  "complete": true,
+  "grade": {
+    "fox": {
+      "positions": 3419,
+      "accuracy": {
+        "successes": 2378,
+        "trials": 2381,
+        "rate": 0.99874,
+        "low": 0.996302,
+        "high": 0.999571
+      },
+      "resistance": {
+        "successes": 1031,
+        "trials": 1038,
+        "rate": 0.993256,
+        "low": 0.986145,
+        "high": 0.99673
+      },
+      "nodes": 1813901,
+      "nodesPerPosition": 530.535537
+    },
+    "hounds": {
+      "positions": 3453,
+      "accuracy": {
+        "successes": 1565,
+        "trials": 1641,
+        "rate": 0.953687,
+        "low": 0.942415,
+        "high": 0.962839
+      },
+      "resistance": {
+        "successes": 1777,
+        "trials": 1812,
+        "rate": 0.980684,
+        "low": 0.973256,
+        "high": 0.986079
+      },
+      "nodes": 2350628,
+      "nodesPerPosition": 680.749493
+    },
+    "all": {
+      "positions": 6872,
+      "accuracy": {
+        "successes": 3943,
+        "trials": 4022,
+        "rate": 0.980358,
+        "low": 0.975589,
+        "high": 0.984211
+      },
+      "resistance": {
+        "successes": 2808,
+        "trials": 2850,
+        "rate": 0.985263,
+        "low": 0.980141,
+        "high": 0.989079
+      },
+      "nodes": 4164529,
+      "nodesPerPosition": 606.014115
+    }
+  }
+}

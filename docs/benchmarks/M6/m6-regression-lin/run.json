@@ -1,0 +1,30 @@
+{
+  "format": "tuning-run/1",
+  "id": "m6-regression-lin-n8",
+  "seed": 20261109,
+  "commit": "13827e260e15a05cb297f6c3827601248a599434",
+  "version": "0.1.0\u002B13827e260e15a05cb297f6c3827601248a599434",
+  "spec": {
+    "format": "tuning/1",
+    "id": "m6-regression-lin-n8",
+    "seed": 20261109,
+    "ruleSet": "classic",
+    "boardSize": 8,
+    "tuner": "regression",
+    "evaluator": "linear",
+    "name": "lin-r1-n8",
+    "train": "../suites/n8/train.txt",
+    "validation": "../suites/n8/validation.txt"
+  },
+  "specSha256": "7a77ff761954a422e2c9760251a9c8b9a67107be6823a621d4e35ead263f61ad",
+  "inputs": {
+    "train": {
+      "file": "/home/claude/foxhounds/experiments/tuning/../suites/n8/train.txt",
+      "sha256": "90798338295a6c963d6bd5f412eb1f07055191c1f05699ec4bf4aff75c59f9ef"
+    },
+    "validation": {
+      "file": "/home/claude/foxhounds/experiments/tuning/../suites/n8/validation.txt",
+      "sha256": "cf34eeb31b5c1e72b1e3c170dcfba7d55a01038fe0a0b3ef8fc6950f0a843b28"
+    }
+  }
+}

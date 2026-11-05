@@ -1,0 +1,1 @@
+{ "format": "agent/1", "type": "minimax", "name": "lin-s1-n8-2m", "evaluator": { "type": "linear", "weightsFile": "../weights/lin-s1-n8.json" }, "search": { "rootSelection": "best" }, "budget": { "maxNodes": 2000000 } }

@@ -1,0 +1,1 @@
+{ "format": "experiment/1", "id": "m6-grade-lin-s1-n8-1000", "seed": 20261107, "ruleSet": "classic", "boardSize": 8, "mode": "grade", "agents": { "candidate": "agents/lin-s1-n8-1000.json" }, "suite": "../suites/n8/validation.txt" }

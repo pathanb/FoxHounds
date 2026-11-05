@@ -1,0 +1,39 @@
+{
+  "format": "tuning-run/1",
+  "id": "m6-spsa-lin-n8-1k",
+  "seed": 20261110,
+  "commit": "13827e260e15a05cb297f6c3827601248a599434",
+  "version": "0.1.0\u002B13827e260e15a05cb297f6c3827601248a599434",
+  "spec": {
+    "format": "tuning/1",
+    "id": "m6-spsa-lin-n8-1k",
+    "seed": 20261110,
+    "ruleSet": "classic",
+    "boardSize": 8,
+    "tuner": "spsa",
+    "evaluator": "linear",
+    "name": "lin-s1-n8",
+    "train": "../suites/n8/train.txt",
+    "validation": "../suites/n8/validation.txt",
+    "spsa": {
+      "iterations": 500,
+      "objective": "gradeAccuracy",
+      "batch": 2000,
+      "budget": {
+        "maxNodes": 1000
+      },
+      "workers": 2
+    }
+  },
+  "specSha256": "3e50c0fa6b3c0ea13e63d743267b00533f42f7db43aca4ec5055f9cca860b44c",
+  "inputs": {
+    "train": {
+      "file": "/home/claude/foxhounds/experiments/tuning/../suites/n8/train.txt",
+      "sha256": "90798338295a6c963d6bd5f412eb1f07055191c1f05699ec4bf4aff75c59f9ef"
+    },
+    "validation": {
+      "file": "/home/claude/foxhounds/experiments/tuning/../suites/n8/validation.txt",
+      "sha256": "cf34eeb31b5c1e72b1e3c170dcfba7d55a01038fe0a0b3ef8fc6950f0a843b28"
+    }
+  }
+}

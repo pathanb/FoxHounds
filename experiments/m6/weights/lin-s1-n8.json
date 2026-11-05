@@ -1,0 +1,20 @@
+{
+  "format": "weights/1",
+  "name": "lin-s1-n8",
+  "evaluator": "linear",
+  "boardSize": 8,
+  "weights": {
+    "FoxAdvance": 6,
+    "FoxMobility": 6,
+    "HoundMobility": -7,
+    "FoxRegion": 3,
+    "GoalReachable": 198,
+    "GoalCloseness": 31,
+    "HoundsPassed": 13,
+    "HoundSpread": 26,
+    "HoundMovesLeft": -5,
+    "EscapeDistance": -5,
+    "FoxToMove": -2
+  },
+  "provenance": "m6-spsa-lin-n8-1k"
+}

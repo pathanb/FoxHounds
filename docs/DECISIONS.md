@@ -332,6 +332,42 @@ hound wins usually end, and fox wins escape, before the hounds use up their move
 are few and repeat. The suite keeps what was found: train 34,370, validation 6,872, test 13,757. It is committed
 under `experiments/suites/n8/` and can be regenerated exactly with the command in its header.
 
+Tuner (M6):
+
+**D-61 Tuning specs and outputs (completes 12).** A tuning spec (format tuning/1) names the id, seed, ruleset
+preset and board size, the `tuner` (`regression` or `spsa`), the `evaluator` (`linear` or `tapered`), the output
+`name`, and the `train` and `validation` position files. An SPSA run may also name its `start` weights (default
+lin-v0; a linear start seeds both halves of a tapered run). Sections `regression` (k, lambda, learningRate,
+maxSteps, patience) and `spsa` (iterations, a, c, stability, targetStep, validateEvery, per-weight `scales`,
+`objective`, batch, budget, openings, pairs, workers) override the 12.2 and 12.3 defaults. SPSA budgets are nodes or
+depth only. There is no test field: tuners never read the test split (12.1). `fh tune SPEC --out DIR` writes:
+- `weights.json`, with the board size, and the run id as provenance;
+- `report.json`;
+- `run.json`: the spec, its SHA-256, the commit, and the SHA-256 of every input file;
+- `tuning.csv`, for SPSA.
+
+The regression starts from β = 0 and sums rows in order on one thread, so it is deterministic. Its reported loss
+and accuracy are those of the rounded weights with the fitted intercept, and the loss without the intercept is
+reported too. Dropping the intercept shifts every evaluation by the same amount, which changes no search decision.
+The GradeAccuracy batch is drawn without replacement from the won train positions; each position is searched with
+a fresh 1 MB table, so the score does not depend on the order. The HeadToHead objective validates by playing the
+weights against the start weights from the validation positions, and is only smoke-tested (D-19).
+
+**D-62 First tuning results and the first promotion attempt (12.4, M6).** Details are in
+docs/benchmarks/M6-tuning.md.
+- **Regression fits** of the 34,370 train positions predict the solver's winner well (validation accuracy 83.3%
+  linear, 84.8% tapered), but they play no better than lin-v0: 84.2% and 87.9% hounds conversion at 1,000 nodes,
+  against 89.6%.
+- **SPSA** from lin-v0 (GradeAccuracy at 1,000 nodes, per D-60) gave lin-s1-n8. The protocol ran at 1,000 nodes,
+  the budget it was tuned for, except step 4:
+  - Step 2 fails narrowly: 98.37% [98.06, 98.62] against 97.80% [97.45, 98.09]. The intervals overlap by 0.03 pp,
+    and the 20,000-position route needs a larger test split than D-60's 13,757 positions.
+  - Step 3 passes: SPRT accepted H1 after 530 pairs, Elo +11 [+2, +20].
+  - Step 4 passes: 100% conversion on both sides, no blunders.
+
+lin-s1-n8 is therefore not promoted, and lin-v0 stays the default. No default-weights lookup (D-18) is built until a
+file is promoted. The owner decides step 5 and can overrule (Q-09).
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |
@@ -345,6 +381,7 @@ under `experiments/suites/n8/` and can be regenerated exactly with the command i
 | Q-07 | Build tables for n = 9–11 on first use, with a progress bar.                            |
 | —    | The optional PlayoutEvaluator (9.2) is not built in v1 unless the owner asks for it.     |
 | Q-08 | _Open._ After the M5 baseline (D-60): which 8.9 targets should stand, given that lin-v0 meets all three with no error at 2,000,000 nodes? |
+| Q-09 | _Open._ lin-s1-n8 passes promotion steps 3 and 4 but misses step 2 by 0.03 pp of interval overlap (D-62). Keep lin-v0 (the protocol as written), promote lin-s1-n8, or enlarge the test split and grade again? |
 
 ## 17.3 Recorded values
 
@@ -359,4 +396,4 @@ under `experiments/suites/n8/` and can be regenerated exactly with the command i
 | M3 | evaluation cost (spec 9.4) | 50 ns per lin-v0 evaluation, 36 ns of it the flood fill (64-bit path for n ≤ 11; 86 ns before). Leaves are 35% of nodes, so evaluation is about 19% of search time in the benchmark profile: the SHOULD target of 10% is not met. A shift-based flood fill measured slower (80 ns); an evaluation cache is the next candidate, to try with the M5 harness |
 | M5 | competence baseline for lin-v0 (8.9) | At 2,000,000 nodes per ply, 8×8 Classic vs solver: hounds conversion 100.0% [99.62, 100] (1000/1000 hounds-won D-15 openings); fox conversion 100.0% [99.62, 100] from 1,000 fox-won test-split positions and from 1,000 fox-won openings; blunders 0/17,158 (hounds) and 0/7,793 (fox). Budget sweep and grade results in docs/benchmarks/M5-competence.md; see D-60 |
 | M5 | agreed 8.9 targets | _awaiting the owner (Q-08)_; proposed: keep the three targets at 2,000,000 nodes, and track the hounds conversion at 20,000 nodes (98.8% for lin-v0) as the development metric |
-| M6 | promoted weight files and their experiment ids | _pending_ |
+| M6 | promoted weight files and their experiment ids | None yet. Candidate lin-s1-n8 (`m6-spsa-lin-n8-1k`; promotion runs `m6-promotion-*`) failed step 2 of 12.4 (D-62); the decision awaits Q-09 |

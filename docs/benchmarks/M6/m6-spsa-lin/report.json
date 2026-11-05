@@ -1,0 +1,37 @@
+{
+  "format": "tuning-report/1",
+  "id": "m6-spsa-lin-n8-1k",
+  "tuner": "spsa",
+  "evaluator": "linear",
+  "trainPositions": 34370,
+  "validationPositions": 6872,
+  "spsa": {
+    "iterations": 500,
+    "gain": 6432.591603154762,
+    "c": 2,
+    "startValidation": 0.9762134007776883,
+    "bestValidation": 0.9823072459940199,
+    "budget": "maxNodes 1000",
+    "warnings": []
+  },
+  "weights": {
+    "format": "weights/1",
+    "name": "lin-s1-n8",
+    "evaluator": "linear",
+    "boardSize": 8,
+    "weights": {
+      "FoxAdvance": 6,
+      "FoxMobility": 6,
+      "HoundMobility": -7,
+      "FoxRegion": 3,
+      "GoalReachable": 198,
+      "GoalCloseness": 31,
+      "HoundsPassed": 13,
+      "HoundSpread": 26,
+      "HoundMovesLeft": -5,
+      "EscapeDistance": -5,
+      "FoxToMove": -2
+    },
+    "provenance": "m6-spsa-lin-n8-1k"
+  }
+}

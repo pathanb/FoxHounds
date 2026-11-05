@@ -16,6 +16,7 @@ internal static class Program
             MatchCommand.Create(grade: false),
             MatchCommand.Create(grade: true),
             ReportCommand.Create(),
+            TuneCommand.Create(),
         };
 
         try

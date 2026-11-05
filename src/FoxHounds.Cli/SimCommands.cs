@@ -285,3 +285,22 @@ internal static class SimCommon
         return string.Create(CultureInfo.InvariantCulture, $"{p.Done}/{p.Total}  {p.PerMinute:0.0}/min  finish {finish}  {p.Headline}");
     }
 }
+
+/// <summary><c>fh tune</c>: the regression and SPSA tuners (spec 12).</summary>
+internal static class TuneCommand
+{
+    public static Command Create()
+    {
+        var spec = new Argument<string>("spec") { Description = "Tuning spec (tuning/1 JSON)." };
+        var output = new Option<string>("--out", "-o") { Description = "Folder for weights.json, report.json, run.json and tuning.csv.", Required = true };
+        var command = new Command("tune", "Tune evaluation weights: regression on solver labels, or SPSA on move quality.") { spec, output };
+        command.SetAction(parse =>
+        {
+            var writer = parse.InvocationConfiguration.Output;
+            var result = FoxHounds.Tuning.TuningRun.Run(parse.GetValue(spec)!, parse.GetValue(output)!, message => writer.WriteLine(message), SimCommon.Store);
+            writer.WriteLine($"wrote {Path.Combine(parse.GetValue(output)!, "weights.json")} ({result.Weights.Name})");
+            return 0;
+        });
+        return command;
+    }
+}

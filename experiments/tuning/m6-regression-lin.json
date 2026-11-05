@@ -1,0 +1,12 @@
+{
+  "format": "tuning/1",
+  "id": "m6-regression-lin-n8",
+  "seed": 20261109,
+  "ruleSet": "classic",
+  "boardSize": 8,
+  "tuner": "regression",
+  "evaluator": "linear",
+  "name": "lin-r1-n8",
+  "train": "../suites/n8/train.txt",
+  "validation": "../suites/n8/validation.txt"
+}

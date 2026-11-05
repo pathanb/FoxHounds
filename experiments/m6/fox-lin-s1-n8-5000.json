@@ -1,0 +1,1 @@
+{ "format": "experiment/1", "id": "m6-fox-lin-s1-n8-5000", "seed": 20261105, "ruleSet": "classic", "boardSize": 8, "mode": "vsReference", "agents": { "candidate": "agents/lin-s1-n8-5000.json", "reference": "../agents/solver.json" }, "candidateSide": "fox", "openings": "../openings/n8-p6-16-foxWon-1000.txt", "saveRecords": "none" }

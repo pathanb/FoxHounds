@@ -1,0 +1,20 @@
+{
+  "format": "weights/1",
+  "name": "lin-r1-n8",
+  "evaluator": "linear",
+  "boardSize": 8,
+  "weights": {
+    "FoxAdvance": -562,
+    "FoxMobility": 230,
+    "HoundMobility": -203,
+    "FoxRegion": 6,
+    "GoalReachable": 943,
+    "GoalCloseness": 375,
+    "HoundsPassed": 333,
+    "HoundSpread": 414,
+    "HoundMovesLeft": 63,
+    "EscapeDistance": -460,
+    "FoxToMove": 487
+  },
+  "provenance": "m6-regression-lin-n8"
+}
