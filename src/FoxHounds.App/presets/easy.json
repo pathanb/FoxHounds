@@ -1,0 +1,9 @@
+{
+  "format": "agent/1",
+  "type": "minimax",
+  "name": "easy",
+  "evaluator": { "type": "linear" },
+  "search": { "ttMegabytes": 16 },
+  "budget": { "maxDepth": 2 },
+  "epsilon": 0.25
+}

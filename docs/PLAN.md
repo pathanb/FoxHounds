@@ -10,8 +10,8 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M0 Setup | solution skeleton, build rules, package pins, banned APIs, CI workflow, T-ARCH-01 | done (e6eaf99) |
 | M1 Rules core | Geometry, RuleSet, Rules, GameState, Move, Zobrist, Rng, notation, GameRunner, RandomAgent, `fh perft`; T-CORE-01…08 | done (dbae502, after review fixes) |
 | M2 Solver | table build, files, SolverAgent, `fh solve`; T-SOL-01…07 | done (dbae502, after review fixes) |
-| M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | done (see log: commit after review fixes) |
-| M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | not started |
+| M3 Search and evaluation | features, evaluators, weight files, search stages A, B and C (D-37), MinimaxAgent, EpsilonAgent, SolverEvaluator, `fh analyse`; T-ENG-01…04, T-ENG-06, T-EVAL-01…03 | done (483fc43, after review fixes) |
+| M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | done (see log; hash recorded with the next commit) |
 | M5 Simulation harness | stage C search, openings and suites, experiment modes, statistics, `fh match/grade/report`; T-ENG-05…06, T-SIM-01…03 | not started |
 | M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02 | not started |
 | M7 Replay and analysis | viewer, solver colouring, analyse, play from here | not started |
@@ -39,6 +39,7 @@ dotnet test --coverlet --coverlet-output-format cobertura   # coverage into ./Te
 dotnet format --verify-no-changes               # format check, as in CI
 dotnet run --project src/FoxHounds.Cli -c Release -- perft --n 8 --depth 10
 dotnet run --project bench/FoxHounds.Bench -c Release -- --filter '*'
+dotnet run --project src/FoxHounds.App -c Release             # the game; --data DIR, --load FILE.fhg, --size WxH
 python3 reference/fh_proto.py all               # reference tables, about 4 minutes
 ```
 
@@ -53,7 +54,27 @@ bash /tmp/dotnet-install.sh --channel 10.0 --install-dir "$HOME/.dotnet"
 export DOTNET_ROOT="$HOME/.dotnet" PATH="$HOME/.dotnet:$PATH" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
 ```
 
-The desktop app can be run headless for screenshots with `xvfb-run -a -s "-screen 0 1280x800x24" …`.
+The desktop app can be run headless for screenshots; the options are listed in `src/FoxHounds.App/Program.cs`:
+
+```bash
+xvfb-run -a -s "-screen 0 1700x1100x24" src/FoxHounds.App/bin/Release/net10.0/FoxHounds --data /tmp/fh \
+    --screenshot /tmp/shot.png --n 8 --moves "e1-d2 b8-c7" --select d2      # or --fox Hard --hounds Hard --frames 600
+```
+
+## Manual checks (spec 16.1)
+
+What could be checked without a screen was checked headlessly; the owner's hands-on pass is still to do.
+
+| Item | Checked so far |
+|------|----------------|
+| 1. Four end reasons, human vs human | T-APP-01 plays each reason through the session; not yet by hand |
+| 2. Every preset plays both sides; the window stays responsive | AI-vs-AI runs of all four presets finished their games; slowest frames after start 35–42 ms (Xvfb software rendering, 2 vCPUs) |
+| 3. Undo during a search cancels within 100 ms | T-APP-01 with the real search |
+| 4. ChooseOnBackRow, human and AI fox | screenshot (human) and T-APP-01 (both) |
+| 5. Sizes 4, 7, 8, 12, 16 readable at 800×600 | screenshots checked |
+| 6. Save, quit, relaunch, load | headless save then `--load` relaunch, and T-APP-01 |
+| 7. AI vs AI at every delay; Pause stops after the current ply | T-APP-01 with the manual clock |
+| 8. Resize mid-game | layout tests at 25 window and board sizes; not yet by hand |
 
 ## Log
 
@@ -77,3 +98,7 @@ The desktop app can be run headless for screenshots with `xvfb-run -a -s "-scree
   tables, budgets, allocation all checked) but two major findings: RandomAmongBest reported the best move's line
   and score for a different played move, and T-ENG-03/04 could not catch a broken TT score conversion or a missing
   D-39 check (shown by mutation). Fixed with D-40 … D-43; each new test was checked to fail on its mutant.
+- 2026-11-05: M4 done. The app plays human and AI games on 4×4–16×16 with the 13.3 presets and custom specs,
+  undo/redo, save/load and AI-vs-AI with pause and delay (D-44 … D-52). T-APP-01 found one real bug, the source
+  generator filling init-only properties (D-52), which had broken the Easy and Medium presets. Coverage:
+  GameSession 93%, Layout 97%, Agents 91%; the Raylib drawing code is checked with headless screenshots instead.

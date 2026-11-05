@@ -24,6 +24,9 @@ public sealed class SolverAgent : IAgent
     /// <inheritdoc />
     public string Name => _randomTies ? "solver[random-ties]" : "solver";
 
+    /// <summary>True when ties between equally good plies are broken at random.</summary>
+    public bool RandomTies => _randomTies;
+
     /// <inheritdoc />
     /// <exception cref="ArgumentException">The table does not cover the game's board size and win condition.</exception>
     public void NewGame(Rules rules, Side side, Rng rng)

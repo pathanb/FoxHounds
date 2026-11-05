@@ -1,0 +1,9 @@
+{
+  "format": "agent/1",
+  "type": "minimax",
+  "name": "medium",
+  "evaluator": { "type": "linear" },
+  "search": { "ttMegabytes": 32 },
+  "budget": { "maxDepth": 6 },
+  "epsilon": 0.05
+}

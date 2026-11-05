@@ -26,6 +26,12 @@ public sealed class MinimaxAgent : IAgent
     /// <inheritdoc />
     public string Name => _name;
 
+    /// <summary>The evaluator at the search's leaves.</summary>
+    public IEvaluator Evaluator => _evaluator;
+
+    /// <summary>The search options every game uses.</summary>
+    public SearchOptions Options => _options;
+
     /// <summary>The search of the current game, for progress counters in the UI; null before the first game.</summary>
     public Search? CurrentSearch => Volatile.Read(ref _search);
 

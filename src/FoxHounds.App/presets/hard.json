@@ -1,0 +1,8 @@
+{
+  "format": "agent/1",
+  "type": "minimax",
+  "name": "hard",
+  "evaluator": { "type": "linear" },
+  "search": { "ttMegabytes": 64, "rootSelection": "randomAmongBest" },
+  "budget": { "maxNodes": 2000000, "hardTimeMs": 3000 }
+}

@@ -210,6 +210,62 @@ value, and every other proof must have the right winner and a distance no shorte
 tests check that lines are full length with the root score at their leaf, that RandomAmongBest never plays a
 proven loss (on a position that has one), and that tapered scores are truncated toward zero.
 
+Desktop app (M4):
+
+**D-44 Panel and game settings (completes 13.2, 13.4).** 13.2 lists the panel from the player cyclers down, but a
+new game also needs a board size, a rule variant and a fox start. Three cyclers above the players set them: Board
+(4–16), Rules (Classic or Gilith; a loaded record that matches neither shows "Custom") and Fox start (fixed or fox
+chooses). Changing one starts a new game at once with the same players, so the panel always describes the game on
+the board; the settings are read from the session's rules each frame, with no second copy. The buttons are New game,
+Undo, Redo; Play/Pause and the delay (shown in seconds); Save and Load.
+
+**D-45 Player choices (completes 13.3).** Each side cycles through Human, the four presets (`presets/*.json` next to
+the executable) and one entry per agent/1 file in `{data}/agents` ("Custom: name"; a file that does not parse is
+skipped). That list stands in for "Custom… (loads an AgentSpec JSON)", as there is no native file dialog (13.4).
+Perfect is offered on every board the solver supports (n ≤ 11): tables up to 8×8 load with each game, and 9×9–11×11
+tables are built on first use with progress on the evaluation line, as Q-07 says. On 12×12 and larger a Perfect
+player becomes Human, with a notice. A loaded record's players are matched to these choices by their spec JSON.
+
+**D-46 Changing a player mid-game (refines 13.3).** "Takes effect at that side's next turn" is read literally: a
+search already running for that side completes and its ply is played, and the old agent is then dropped. A side
+waiting for a human gets the new player at once, since its next move request is now.
+
+**D-47 Undo and redo edge cases (refines 13.4).** With a human playing, Undo goes back to the latest earlier
+position with a human to move. When there is none (an AI opened and only the other side is human), Undo is
+disabled rather than letting the AI replay its first move. The fox's placement under ChooseOnBackRow is not a ply
+and is not undone; New game repeats it. Undo and Redo cancel a running search first, and a cancelled search's late
+answer is discarded.
+
+**D-48 AI failures in the app (refines 7.3 for the app).** An illegal ply or a fox start off the back row forfeits,
+as in the game runner. An agent that throws (a bug, or a custom spec whose weight file fails to load) does not: the
+game pauses with a message, and that side is not asked again until the user changes the player, undoes, redoes,
+resumes or starts a new game. Asking again every frame would only repeat the error, and the user can still rescue
+the game. The game runner keeps the 7.3 forfeit.
+
+**D-49 Status line and game-over banner (refines 13.2, 13.4).** Text is ASCII only, because raylib's built-in font
+has no em dash: "thinking - depth 9, 1.2M nodes". Notices (saved, loaded, a player reset) show for 4 s; problems stay
+until the next action. The game-over banner (winner and reason; New game, Save and Replay, which waits for M7) sits
+in the half of the board away from the fox, so the final position stays visible, and Esc or a click on the board
+hides it. The evaluation line shows a proven but inexact AI score as an upper bound (D-41) and drops the solver
+verdict once the game is over.
+
+**D-50 Files and folders (completes 13.4, 14).** The data folder is `{LocalApplicationData}/FoxHounds`
+(`%LOCALAPPDATA%\FoxHounds` on Windows, `~/.local/share/FoxHounds` on Linux), with `tables/`, `games/` and
+`agents/`; `--data DIR` replaces it. A saved game is named after its start time in UTC
+(`2026-11-05T12-00-00Z.fhg`), and saving the same game again replaces its file. `--load FILE` opens a record at
+start. Records store `"exact": true` in agent info when D-41 says so; older readers ignore the field (14).
+
+**D-51 Rendering structure (refines 13.1).** `RaylibView` reads the `GameSession` directly rather than a copied
+snapshot. Every change to the session happens on the main thread, in `Update` and the input handlers, so a frame
+always sees one consistent state; only the AI's progress counters are read across threads, with `Volatile`. Only
+`Program`, `AppController`, `InputController`, `RaylibView` and `Ui` use Raylib. `GameSession` and `Layout` do not,
+and are unit-tested (T-APP-01).
+
+**D-52 JSON spec types use set accessors.** System.Text.Json's source generator fills every init-only property of a
+type, so a field missing from the JSON got default(T) instead of its initializer: `rootSelection` became null, which
+broke the Easy and Medium presets (found by T-APP-01). The parts of agent/1 specs therefore use `set` accessors, and
+a test pins their defaults. Agent specs and game records also reject duplicate keys, like weight files (D-42).
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |
