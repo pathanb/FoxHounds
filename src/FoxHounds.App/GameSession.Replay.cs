@@ -299,6 +299,7 @@ internal sealed partial class GameSession
             return "";
         }
 
+        CollectAnalysis();
         if (Analysing && _analysisCursor == _cursor && _analysisSearch is { } search)
         {
             int depth = search.DepthInProgress;
@@ -326,19 +327,29 @@ internal sealed partial class GameSession
 
     /// <summary>Depth, nodes and time of the analysis kept for the shown position, or empty.</summary>
     public string AnalysisDetailText() =>
-        InReplay && !Analysing && _analyses.TryGetValue(_cursor, out var analysis) && analysis.Info.DepthReached > 0
+        ReplayAnalysis() is { Info.DepthReached: > 0 } analysis && !Analysing
             ? string.Create(CultureInfo.InvariantCulture,
                 $"depth {analysis.Info.DepthReached}, {FormatNodes(analysis.Info.Nodes)} nodes, {analysis.Info.Elapsed.TotalSeconds:0.0} s")
             : "";
 
     /// <summary>The analysis's principal variation, or empty.</summary>
     public string AnalysisLineText() =>
-        InReplay && !Analysing && _analyses.TryGetValue(_cursor, out var analysis) && analysis.Info.DepthReached > 0
-            ? "line " + FormatLine(analysis.Info.PrincipalVariation)
-            : "";
+        ReplayAnalysis() is { Info.DepthReached: > 0 } analysis && !Analysing ? "line " + FormatLine(analysis.Info.PrincipalVariation) : "";
 
-    /// <summary>The analysis kept for the shown position, if any.</summary>
-    public AnalysisResult? ReplayAnalysis() => InReplay && _analyses.TryGetValue(_cursor, out var analysis) ? analysis : null;
+    /// <summary>
+    /// The analysis kept for the shown position, if any. A search that has just finished counts at once: its result is
+    /// collected here rather than waiting for the next <see cref="Update"/>.
+    /// </summary>
+    public AnalysisResult? ReplayAnalysis()
+    {
+        if (!InReplay)
+        {
+            return null;
+        }
+
+        CollectAnalysis();
+        return _analyses.TryGetValue(_cursor, out var analysis) ? analysis : null;
+    }
 
     /// <summary>
     /// "Analyse" (spec 13.5): a fresh search of the shown position in the background, up to 2 s, with the default
@@ -347,6 +358,7 @@ internal sealed partial class GameSession
     /// </summary>
     public void Analyse()
     {
+        CollectAnalysis(); // a finished search's result is kept before a new one starts
         if (!CanAnalyse)
         {
             return;

@@ -7,6 +7,7 @@ exact solver that grades it, a reproducible simulation harness and an automatic 
 - Decisions and recorded values: [docs/DECISIONS.md](docs/DECISIONS.md)
 - Plan and status: [docs/PLAN.md](docs/PLAN.md)
 - Reference prototype (the source of every test number): [reference/fh_proto.py](reference/fh_proto.py)
+- User guide: [docs/user-guide.md](docs/user-guide.md)
 
 ## Layout
 
@@ -23,6 +24,7 @@ tests/                  one xUnit v3 test project per library
 bench/                  BenchmarkDotNet suites
 reference/              Python reference prototype and its outputs
 tools/app-checks/       drives the app on a virtual display for the manual checks
+tools/publish.sh        builds the release folders
 ```
 
 ## Build and test
@@ -33,5 +35,11 @@ Requires the .NET 10 SDK.
 dotnet build
 dotnet test --filter "Category!=Slow"
 ```
+
+## Release builds
+
+`tools/publish.sh` makes self-contained folders for Windows (win-x64), Linux (linux-x64) and macOS on Apple silicon
+(osx-arm64) under `artifacts/release`, each with the game, the `fh` tool and the user guide. They run without .NET
+installed.
 
 See [docs/PLAN.md](docs/PLAN.md) for the full command list.

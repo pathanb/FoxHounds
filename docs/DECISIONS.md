@@ -419,6 +419,54 @@ Replay and analysis (M7):
   player with its own weights could not be rebuilt, for example for Play from here. The app matches recorded players
   to its presets in that form. Records written earlier keep their relative paths; replaying them is unaffected.
 
+Hardening (M8):
+
+**D-65 Release builds (completes M8; Q-06: self-contained folders only).**
+
+- **What a build is.** `tools/publish.sh` makes one self-contained folder per runtime (win-x64, linux-x64,
+  osx-arm64), with:
+  - both programs, FoxHounds and fh, sharing one runtime;
+  - the presets;
+  - the user guide (docs/user-guide.md, as USER-GUIDE.md);
+  - the experiments folder, so the guide's research examples run from the build.
+
+  Each folder is archived as a .zip for Windows or a .tar.gz for Linux and macOS (the latter keeps the executable
+  bits), with SHA256SUMS.txt, under artifacts/release. Builds are not committed.
+- **Not trimmed, not single-file.** Trimming risks reflection paths that cannot be exercised here on two of the three
+  systems. A single file would carry the runtime twice, once per program. A build is about 85 MB unpacked and 35–38
+  MB archived.
+- **Contents.** English only (no satellite resource folders). The .pdb files stay, so a crash report has line numbers.
+- **No console window on Windows.** The app is now a WinExe. Its `--screenshot` check mode therefore prints nothing
+  on Windows; that mode is for Linux.
+- **Version 1.0.0.** The informational version carries the commit.
+- **What was checked:**
+
+  | Build | Checked | Not checked |
+  |---|---|---|
+  | linux-x64 | unpacked and run with no .NET on the PATH: fh perft, analyse, match, grade and report; the guide's m6 examples reproduce the recorded M6 numbers; the app played a Hard against Hard game to the end | |
+  | win-x64 | executables are x64, FoxHounds.exe has the Windows GUI subsystem, fh.exe the console one; raylib.dll is present | not run: no Windows machine here |
+  | osx-arm64 | the apphost is arm64 and ad-hoc signed (the .NET 10 SDK signs it even when publishing from Linux); the arm64 slice of libraylib.dylib and the runtime libraries are signed | not run: no Mac here |
+
+- **Not publisher-signed.** The user guide explains the Windows SmartScreen and macOS quarantine steps.
+
+**D-66 Hardening.**
+
+- **Unreadable player files.** A preset or custom player file that cannot be read is skipped, not only one that
+  does not parse; this covers I/O and permission errors. The app names the skipped files on the status line, where
+  the notice stays until the next action, and on stderr. Before this, an unreadable file stopped the app at startup.
+- **Settle time for a new computer player (amends D-46).** A newly chosen computer player waits 0.5 s before it may
+  move. Clicking from Human to Perfect passes Easy, Medium and Hard. On the fox's turn, Easy used to move at once, as
+  D-46 allowed. A running search still completes as D-46 says. Tests keep the settle at zero, except the one that
+  checks it.
+- **Analysis results.** A finished analysis is collected when its result is read (and before a new one starts),
+  not only in the next Update. The full Release run found the gap: a test read the result between the task ending
+  and the next frame.
+- **n = 10 solver (SHOULD).** Delivered in M2 (17.3) and checked in the app with real clicks. On a fresh data
+  folder, Perfect on 10×10 built the 212 MB table in the background, with progress on the evaluation line, then
+  played from it.
+- **M8 exit criteria.** All 568 tests, the 9 slow ones included, pass on a Release build of a fresh clone. The
+  competence targets are met as provisionally set (D-60); the final targets still await Q-08.
+
 ## 17.2 Open questions, answered
 
 | ID   | Answer                                                                                   |

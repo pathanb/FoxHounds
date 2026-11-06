@@ -45,6 +45,7 @@ internal sealed partial class GameSession : IDisposable
     private readonly Stack<PlyRecord> _redo = new();
     private readonly PlayerOption[] _players = [PlayerOption.Human, PlayerOption.Human];
     private readonly IAgent?[] _agents = new IAgent?[2];
+    private readonly TimeSpan[] _settleUntil = [TimeSpan.MinValue, TimeSpan.MinValue];
     private Rng _rng = new(1);
     private GameState? _start;
     private GameState _position;
@@ -133,6 +134,13 @@ internal sealed partial class GameSession : IDisposable
 
     public bool AiThinking => _aiTask is { IsCompleted: false };
 
+    /// <summary>
+    /// How long a newly chosen computer player waits before it may move. Cycling to the wanted player passes others on
+    /// the way, and without the pause the first computer player passed would move at once. The app sets half a second;
+    /// tests leave it at zero.
+    /// </summary>
+    public TimeSpan PlayerSettle { get; set; } = TimeSpan.Zero;
+
     /// <summary>The solver's value of the current position, when a table is loaded for this board.</summary>
     public SolvedValue? SolverValue
     {
@@ -188,6 +196,7 @@ internal sealed partial class GameSession : IDisposable
         _players[(int)side] = option;
         _agents[(int)side] = null;
         _failedSide = null;
+        _settleUntil[(int)side] = _clock.Elapsed + PlayerSettle;
         if (option.NeedsSolver)
         {
             LoadTableInBackground(force: true);
@@ -217,7 +226,7 @@ internal sealed partial class GameSession : IDisposable
 
         if (AwaitingFoxPlacement)
         {
-            if (!IsHuman(Side.Fox) && _failedSide != Side.Fox)
+            if (!IsHuman(Side.Fox) && _failedSide != Side.Fox && _clock.Elapsed >= _settleUntil[(int)Side.Fox])
             {
                 StartAi(Side.Fox, foxStart: true);
             }
@@ -226,7 +235,7 @@ internal sealed partial class GameSession : IDisposable
         }
 
         Side side = _position.SideToMove;
-        if (IsHuman(side) || _failedSide == side)
+        if (IsHuman(side) || _failedSide == side || _clock.Elapsed < _settleUntil[(int)side])
         {
             return;
         }
@@ -499,6 +508,9 @@ internal sealed partial class GameSession : IDisposable
 
     /// <summary>Shows <paramref name="text"/> on the status line for a few seconds.</summary>
     public void Notify(string text) => SetMessage(text, sticky: false);
+
+    /// <summary>Shows <paramref name="text"/> on the status line until the next action, like an error.</summary>
+    public void Warn(string text) => SetMessage(text, sticky: true);
 
     /// <summary>Saved games, newest first.</summary>
     public IReadOnlyList<string> SavedGames() =>

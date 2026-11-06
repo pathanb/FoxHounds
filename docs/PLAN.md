@@ -14,8 +14,8 @@ The working plan for building the [specification](spec/spec.md). Decisions live 
 | M4 Desktop app | GameSession, Raylib view, presets, play, undo/redo, save/load; T-APP-01 | done (be7f77c) |
 | M5 Simulation harness | openings and suites, experiment modes, statistics, `fh openings/suite/match/grade/report`; T-ENG-05, T-SIM-01…03; 8.9 baseline | done (13827e2; targets await Q-08) |
 | M6 Tuner | regression tuner, SPSA, `fh tune`, promotion protocol; T-TUNE-01…02; one candidate through 12.4 | done (29bb84e; promotion decision awaits Q-09) |
-| M7 Replay and analysis | viewer, solver colouring, analyse, play from here; manual checklist items 9–12 | done (see log) |
-| M8 Hardening | n = 10 solver, self-contained builds, user guide | not started |
+| M7 Replay and analysis | viewer, solver colouring, analyse, play from here; manual checklist items 9–12 | done (82285ed) |
+| M8 Hardening | n = 10 solver, self-contained builds, user guide; all tests on a Release build | done (see log; competence targets await Q-08) |
 
 A milestone is done when its tests from spec 15.1 pass, its numbers match the reference prototype, the
 format check is clean, and its commit is recorded in the table above.
@@ -68,6 +68,8 @@ xvfb-run -a -s "-screen 0 1700x1100x24" src/FoxHounds.App/bin/Release/net10.0/Fo
 xvfb-run -a -s "-screen 0 1700x1100x24" src/FoxHounds.App/bin/Release/net10.0/FoxHounds --data /tmp/fh \
     --screenshot /tmp/replay.png --replay game.fhg --cursor 10 --hover d6 --analyse
 fh analyse -p "8/e1/b4,d4,f4,e3/H" --solver        # every legal ply with the solver's value and the viewer's colour
+dotnet test -c Release                               # everything, slow tests included (M8 exit criterion)
+tools/publish.sh                                     # release folders and archives in artifacts/release (D-65)
 ```
 
 ## Manual checks (spec 16.1)
@@ -132,3 +134,9 @@ also used real key presses and clicks on a virtual display: `tools/app-checks/se
   display (docs/benchmarks/M7-viewer.md). The 57-ply game of item 9 needs the Gilith rules: under Classic no game
   can last that long. Found on the way: records stored relative weight paths, so a recorded player with its own
   weights could not be rebuilt; records now keep absolute paths.
+- 2026-11-06: M8 done. Self-contained builds for win-x64, linux-x64 and osx-arm64 from `tools/publish.sh` (D-65).
+  The Linux build was run from the unpacked archive with no .NET installed; the Windows and macOS builds were checked
+  by their headers and signatures only. Also: docs/user-guide.md, version 1.0.0, and hardening (D-66): unreadable
+  player files are skipped, a new computer player waits 0.5 s, and analysis results are collected on read. All 568
+  tests pass on a Release build of a fresh clone, the slow ones included. Open for the owner: Q-08, Q-09, and a
+  first run of the Windows and macOS builds.

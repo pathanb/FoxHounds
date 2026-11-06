@@ -10,9 +10,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Deterministic>true</Deterministic>
 
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <Product>Fox and Hounds</Product>
-    <RepositoryUrl>https://github.com/pathanb/foxhounds</RepositoryUrl>
+    <RepositoryUrl>https://github.com/pathanb/FoxHounds</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -16,7 +16,8 @@ internal static class Program
             "FoxHounds");
         var tables = new SolverTableStore(Path.Combine(dataDir, "tables"));
         var factory = new AgentFactory(tables, SystemClock.Instance);
-        var players = LoadPlayerOptions(Path.Combine(AppContext.BaseDirectory, "presets"), Path.Combine(dataDir, "agents"));
+        var skipped = new List<string>();
+        var players = LoadPlayerOptions(Path.Combine(AppContext.BaseDirectory, "presets"), Path.Combine(dataDir, "agents"), skipped);
 
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.Msaa4xHint);
         Raylib.SetTraceLogLevel(TraceLogLevel.Warning);
@@ -25,8 +26,17 @@ internal static class Program
         Raylib.SetTargetFPS(60);
         Raylib.SetExitKey(KeyboardKey.Null); // Esc clears the selection; it must not close the window
 
-        using var session = new GameSession(factory, SystemClock.Instance, Path.Combine(dataDir, "games"));
+        using var session = new GameSession(factory, SystemClock.Instance, Path.Combine(dataDir, "games"))
+        {
+            PlayerSettle = TimeSpan.FromSeconds(0.5),
+        };
         var app = new AppController(session, players);
+        if (skipped.Count > 0)
+        {
+            string warning = $"skipped unreadable player files: {string.Join(", ", skipped)}";
+            Console.Error.WriteLine(warning);
+            session.Warn(warning);
+        }
         if ((options.Replay ?? options.Load) is { } path && !session.Load(path))
         {
             Console.Error.WriteLine(session.Message);
@@ -50,36 +60,54 @@ internal static class Program
         return 0;
     }
 
-    /// <summary>Human first, then the shipped presets in difficulty order, then the user's own agent specs.</summary>
-    private static List<PlayerOption> LoadPlayerOptions(string presetDir, string customDir)
+    /// <summary>
+    /// Human first, then the shipped presets in difficulty order, then the user's own agent specs. A file that cannot
+    /// be read or parsed is skipped and named in <paramref name="skipped"/>, so a broken file never stops the app.
+    /// </summary>
+    private static List<PlayerOption> LoadPlayerOptions(string presetDir, string customDir, List<string> skipped)
     {
         var list = new List<PlayerOption> { PlayerOption.Human };
         foreach (string name in new[] { "easy", "medium", "hard", "perfect" })
         {
             string path = Path.Combine(presetDir, name + ".json");
-            if (File.Exists(path))
+            if (File.Exists(path) && TryLoad(path, skipped) is { } spec)
             {
-                list.Add(new PlayerOption(CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name), AgentSpec.Load(path)));
+                list.Add(new PlayerOption(CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name), spec));
             }
         }
 
-        if (Directory.Exists(customDir))
+        string[] custom = [];
+        try
         {
-            foreach (string path in Directory.GetFiles(customDir, "*.json").Order(StringComparer.Ordinal))
+            custom = Directory.Exists(customDir) ? Directory.GetFiles(customDir, "*.json") : [];
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            skipped.Add(customDir);
+        }
+
+        foreach (string path in custom.Order(StringComparer.Ordinal))
+        {
+            if (TryLoad(path, skipped) is { } spec)
             {
-                try
-                {
-                    var spec = AgentSpec.Load(path);
-                    list.Add(new PlayerOption("Custom: " + spec.Name, spec));
-                }
-                catch (InvalidDataException)
-                {
-                    // A broken custom spec is skipped, not fatal.
-                }
+                list.Add(new PlayerOption("Custom: " + spec.Name, spec));
             }
         }
 
         return list;
+    }
+
+    private static AgentSpec? TryLoad(string path, List<string> skipped)
+    {
+        try
+        {
+            return AgentSpec.Load(path);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException)
+        {
+            skipped.Add(Path.GetFileName(path));
+            return null;
+        }
     }
 
     /// <summary>Headless check mode: set up a position, render a few frames, write a PNG, exit.</summary>

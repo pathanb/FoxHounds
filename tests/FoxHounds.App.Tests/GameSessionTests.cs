@@ -464,4 +464,30 @@ public sealed class GameSessionTests
 
         throw new InvalidOperationException($"no game ended by {reason}");
     }
+
+    [Fact]
+    public void A_newly_chosen_computer_player_waits_a_moment_so_cycling_past_one_does_not_let_it_move()
+    {
+        using var s = Create(out var clock);
+        s.PlayerSettle = TimeSpan.FromMilliseconds(500);
+        var passed = new ScriptedAgent("e1-f2");
+        var wanted = new ScriptedAgent("e1-d2");
+        s.SetPlayer(Side.Fox, Agent(passed, "passed"));       // the fox is to move: cycling goes past this one
+        clock.Advance(TimeSpan.FromMilliseconds(200));
+        s.SetPlayer(Side.Fox, Agent(wanted, "wanted"));
+        for (int i = 0; i < 10; i++)
+        {
+            s.Update();
+        }
+
+        clock.Advance(TimeSpan.FromMilliseconds(499));
+        s.Update();
+        Assert.False(s.AiThinking);
+        Assert.Equal(0, passed.Calls + wanted.Calls);
+
+        clock.Advance(TimeSpan.FromMilliseconds(1));            // half a second after the last change
+        RunUntil(s, () => s.Plies.Count == 1, "the wanted player's ply");
+        Assert.Equal("e1-d2", s.Rules.Geo.FormatMove(s.Plies[0].Move));
+        Assert.Equal(0, passed.Calls);
+    }
 }
